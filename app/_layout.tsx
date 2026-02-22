@@ -18,7 +18,7 @@ export default function RootLayout() {
         <Stack.Screen name="(home)" options={{ headerShown: false }} />
         <Stack.Screen name="analysis/index" options={{ title: 'Analysis' }} />
         <Stack.Screen name="leaderboard/index" options={{ title: 'LeaderBoard' }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen name="profile/index" options={{ headerShown: false }}  />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

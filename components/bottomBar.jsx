@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     glassEffect: {
         flex: 1,
         flexDirection: 'row',
-        backgroundColor: 'rgb(30, 41, 59)',
+        backgroundColor: '#0F172A',
         backdropFilter: 'blur(10px)',
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.1)',

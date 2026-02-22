@@ -1,36 +1,62 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
+import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins'
+import { useRouter } from 'expo-router'
 
 export default function Navbar() {
+    const [showInfo, setShowInfo] = useState(false)
+    const router = useRouter();
+
+    const [fontsLoaded] = useFonts({
+        Poppins_400Regular,
+        Poppins_600SemiBold,
+        Poppins_700Bold,
+    })
+
+    if (!fontsLoaded) return null
+
     return (
         <View style={styles.container}>
 
             {/* Logo */}
             <TouchableOpacity style={styles.logoCon}>
                 <Image
-                    source={require('../assets/images/Logo.png')} 
+                    source={require('../assets/images/Logo.png')}
                     style={styles.logo}
                     resizeMode="contain"
                 />
+                <Text style={styles.logoText}>Tera<Text style={{ color: 'cyan' }}>Clash</Text></Text>
             </TouchableOpacity>
 
             <View style={styles.rightSection}>
                 {/* Sweats Currency */}
-                <TouchableOpacity style={styles.sweatsContainer}>
+                <TouchableOpacity style={styles.sweatsContainer} onPress={() => {
+                    setShowInfo(true)
+                    setTimeout(() => setShowInfo(false), 5000)
+                }}>
                     <Ionicons name="flame" size={16} color="#facc15" />
                     <Text style={styles.sweatsText}>
-                        100
+                        10
                     </Text>
                 </TouchableOpacity>
 
+                {showInfo && (
+                    <View style={styles.popup}>
+                        <Ionicons name="information-circle" size={14} color="#22d3ee" />
+                        <Text style={styles.popupText}>
+                            Earn sweat coins to unlock powerups
+                        </Text>
+                    </View>
+                )}
+
                 {/* Profile */}
-                <TouchableOpacity style={styles.profile}>
+                <TouchableOpacity style={styles.profile} onPress={()=>router.push('/profile')}>
                     <Text style={styles.profileText}>
                         PR
                     </Text>
                 </TouchableOpacity>
-                </View>
+            </View>
         </View>
     )
 }
@@ -42,7 +68,48 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: 'rgba(30, 41, 59)',
+        backgroundColor: '#0F172A',
+    },
+
+    logoCon: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+
+    logoText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 18,
+        marginLeft: 8,
+        letterSpacing: 1,
+        fontFamily: 'Poppins_700Bold',
+    },
+
+    popup: {
+        position: 'absolute',
+        top: 38,
+        right: -20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#334155',
+        maxWidth: 300,
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        elevation: 6,
+        zIndex: 1000,
+    },
+
+    popupText: {
+        color: 'white',
+        fontSize: 12,
+        fontFamily: 'Poppins_400Regular',
     },
 
     logo: {
@@ -51,7 +118,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
 
-    rightSection:{
+    rightSection: {
         flexDirection: 'row',
         gap: 8,
     },
