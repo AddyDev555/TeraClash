@@ -59,7 +59,7 @@ export default function Home() {
         const toRad = (deg) => (deg * Math.PI) / 180
 
         // 🔥 Fix: shift heading by -90°
-        const adjustedHeading = heading - 90
+        const adjustedHeading = heading
 
         const left = toRad(adjustedHeading - spread)
         const right = toRad(adjustedHeading + spread)
