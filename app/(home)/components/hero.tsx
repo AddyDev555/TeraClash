@@ -339,7 +339,7 @@ export default function HeroCards() {
 
             <View style={styles.card}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <MaterialCommunityIcons name="fire" size={25} color="cyan" />
+                    <MaterialCommunityIcons name="fire" size={24} color="cyan" />
                     <Text style={styles.value}>{kcalBurned}</Text>
                     <Text style={styles.label}>kcal</Text>
                 </View>
@@ -354,6 +354,7 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         gap: 10,
         paddingHorizontal: 16,
+        paddingVertical: 8,
     },
 
     card: {

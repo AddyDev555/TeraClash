@@ -115,11 +115,9 @@ export default function Home() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        borderTopStartRadius: 100,
     },
     map: {
-        borderTopStartRadius: 100,
-        width: Dimensions.get('window').width,
         height: Dimensions.get('window').height,
+        width: Dimensions.get('window').width,
     },
 })

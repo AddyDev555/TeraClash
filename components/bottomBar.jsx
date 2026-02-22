@@ -57,10 +57,11 @@ export default function BottomBar() {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: 0,
+        bottom: 15,
+        zIndex: 1000,
         left: 0,
         right: 0,
-        height: 50,
+        height: 53,
         overflow: 'hidden',
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
     glassEffect: {
         flex: 1,
         flexDirection: 'row',
-        backgroundColor: 'rgba(30, 41, 59, 0.9)',
+        backgroundColor: 'rgb(30, 41, 59)',
         backdropFilter: 'blur(10px)',
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.1)',
