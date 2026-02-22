@@ -1,39 +1,59 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
 import React from 'react'
 import { Ionicons } from '@expo/vector-icons'
 
 export default function Navbar() {
     return (
         <View style={styles.container}>
-            
-            {/* Profile */}
-            <TouchableOpacity style={styles.profile}>
-                <Text style={styles.profileText}>
-                    PR
-                </Text>
+
+            {/* Logo */}
+            <TouchableOpacity style={styles.logoCon}>
+                <Image
+                    source={require('../assets/images/Logo.png')} 
+                    style={styles.logo}
+                    resizeMode="contain"
+                />
             </TouchableOpacity>
 
-            {/* Sweats Currency */}
-            <TouchableOpacity style={styles.sweatsContainer}>
-                <Ionicons name="flame" size={16} color="#facc15" />
-                <Text style={styles.sweatsText}>
-                    100
-                </Text>
-            </TouchableOpacity>
+            <View style={styles.rightSection}>
+                {/* Sweats Currency */}
+                <TouchableOpacity style={styles.sweatsContainer}>
+                    <Ionicons name="flame" size={16} color="#facc15" />
+                    <Text style={styles.sweatsText}>
+                        100
+                    </Text>
+                </TouchableOpacity>
 
+                {/* Profile */}
+                <TouchableOpacity style={styles.profile}>
+                    <Text style={styles.profileText}>
+                        PR
+                    </Text>
+                </TouchableOpacity>
+                </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        paddingTop: 5,
+        paddingHorizontal: 25,
+        paddingVertical: 15,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: 'rgba(30, 41, 59)',
+    },
+
+    logo: {
+        width: 30,
+        height: 30,
+        borderRadius: 10,
+    },
+
+    rightSection:{
+        flexDirection: 'row',
+        gap: 8,
     },
 
     profile: {

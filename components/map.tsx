@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { StyleSheet, View, Dimensions } from 'react-native'
 import MapView, { Circle, Polygon, Polyline } from 'react-native-maps'
 import * as Location from 'expo-location'
-import { Magnetometer } from 'expo-sensors'
 
 export default function Home() {
     const [location, setLocation] = useState(null)
@@ -10,11 +9,14 @@ export default function Home() {
     const [path, setPath] = useState([])
 
     useEffect(() => {
+        let locationSub
+        let headingSub
+
         (async () => {
             const { status } = await Location.requestForegroundPermissionsAsync()
             if (status !== 'granted') return
 
-            Location.watchPositionAsync(
+            locationSub = await Location.watchPositionAsync(
                 {
                     accuracy: Location.Accuracy.BestForNavigation,
                     timeInterval: 1000,
@@ -25,26 +27,27 @@ export default function Home() {
                         latitude: loc.coords.latitude,
                         longitude: loc.coords.longitude,
                     }
+
                     setLocation(newPoint)
+
                     setPath(prev => {
                         if (prev.length === 0) return [newPoint]
-                        const last = prev[prev.length - 1]
-                        const isSame =
-                            last.latitude === newPoint.latitude &&
-                            last.longitude === newPoint.longitude
-                        if (isSame) return prev
                         return [...prev, newPoint]
                     })
                 }
             )
+
+            headingSub = await Location.watchHeadingAsync((h) => {
+                if (h.trueHeading !== -1) {
+                    setHeading(h.trueHeading)
+                }
+            })
         })()
 
-        const sub = Magnetometer.addListener((data) => {
-            const angle = Math.atan2(data.y, data.x)
-            setHeading((angle * 180) / Math.PI)
-        })
-
-        return () => sub.remove()
+        return () => {
+            if (locationSub) locationSub.remove()
+            if (headingSub) headingSub.remove()
+        }
     }, [])
 
     if (!location) return null
@@ -52,17 +55,26 @@ export default function Home() {
     const getCone = (lat, lng, heading) => {
         const length = 0.0007
         const spread = 25
-        const rad = (d) => (d * Math.PI) / 180
+
+        const toRad = (deg) => (deg * Math.PI) / 180
+
+        // 🔥 Fix: shift heading by -90°
+        const adjustedHeading = heading - 90
+
+        const left = toRad(adjustedHeading - spread)
+        const right = toRad(adjustedHeading + spread)
+
+        const lngScale = 1 / Math.cos(toRad(lat))
 
         return [
             { latitude: lat, longitude: lng },
             {
-                latitude: lat + length * Math.cos(rad(heading - spread)),
-                longitude: lng + length * Math.sin(rad(heading - spread)),
+                latitude: lat + length * Math.cos(left),
+                longitude: lng + length * Math.sin(left) * lngScale,
             },
             {
-                latitude: lat + length * Math.cos(rad(heading + spread)),
-                longitude: lng + length * Math.sin(rad(heading + spread)),
+                latitude: lat + length * Math.cos(right),
+                longitude: lng + length * Math.sin(right) * lngScale,
             },
         ]
     }
@@ -74,8 +86,8 @@ export default function Home() {
                 initialRegion={{
                     latitude: location.latitude,
                     longitude: location.longitude,
-                    latitudeDelta: 0.005,
-                    longitudeDelta: 0.005,
+                    latitudeDelta: 0.002,
+                    longitudeDelta: 0.002,
                 }}
                 showsUserLocation={false}
                 followsUserLocation={true}
