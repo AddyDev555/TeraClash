@@ -41,6 +41,14 @@ export default function Navbar() {
                     </Text>
                 </TouchableOpacity>
 
+                {/* Marketplace */}
+                <TouchableOpacity
+                    style={styles.marketplace}
+                    onPress={() => router.push('/')}
+                >
+                    <Ionicons name="cart-outline" size={18} color="cyan" />
+                </TouchableOpacity>
+
                 {showInfo && (
                     <View style={styles.popup}>
                         <Ionicons name="information-circle" size={14} color="#22d3ee" />
@@ -51,7 +59,7 @@ export default function Navbar() {
                 )}
 
                 {/* Profile */}
-                <TouchableOpacity style={styles.profile} onPress={()=>router.push('/profile')}>
+                <TouchableOpacity style={styles.profile} onPress={() => router.push('/profile')}>
                     <Text style={styles.profileText}>
                         PR
                     </Text>
@@ -161,5 +169,16 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 14,
         marginLeft: 6,
+    },
+
+    marketplace: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(30, 41, 59, 0.9)',
+        borderWidth: 2,
+        borderColor: '#334155',
     },
 })

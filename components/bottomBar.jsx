@@ -4,8 +4,8 @@ import { Ionicons } from '@expo/vector-icons'
 import { useRouter, usePathname } from 'expo-router'
 
 export default function BottomBar() {
-    const [activeTab, setActiveTab] = useState('Home')
-
+    const pathname = usePathname();
+    
     const tabs = [
         { name: 'Home', icon: 'home', route: '/' },
         { name: 'Analysis', icon: 'bar-chart', route: '/analysis' },
@@ -15,7 +15,6 @@ export default function BottomBar() {
     const router = useRouter()
 
     const handleTabPress = (route, name) => {
-        setActiveTab(name);
         router.push(route);
     }
 
@@ -28,22 +27,22 @@ export default function BottomBar() {
                         key={tab.name}
                         style={[
                             styles.tab,
-                            activeTab === tab.name && styles.activeTab
+                            pathname === tab.route && styles.activeTab
                         ]}
                         onPress={() => handleTabPress(tab.route, tab.name)}
                         activeOpacity={0.7}
                     >
                         <View style={styles.iconContainer}>
                             <Ionicons
-                                name={activeTab === tab.name ? tab.icon : `${tab.icon}-outline`}
+                                name={pathname === tab.route ? tab.icon : `${tab.icon}-outline`}
                                 size={19}
-                                color={activeTab === tab.name ? 'cyan' : '#94A3B8'}
+                                color={pathname === tab.route ? 'cyan' : '#94A3B8'}
                             />
                             {/* {activeTab === tab.name && <View style={styles.indicator} />} */}
                         </View>
                         <Text style={[
                             styles.tabText,
-                            activeTab === tab.name && styles.activeText
+                            pathname === tab.route && styles.activeText
                         ]}>
                             {tab.name}
                         </Text>

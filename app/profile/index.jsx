@@ -49,20 +49,13 @@ export default function Profile() {
                     <View style={styles.levelBadge}>
                         <Text style={styles.levelText}>Level {user.level}</Text>
                     </View>
-
-                    {/* XP BAR */}
-                    <View style={styles.xpBar}>
-                        <View style={[styles.xpFill, { width: `${xpPercentage}%` }]} />
-                    </View>
-                    <Text style={styles.xpText}>{user.xp} / {user.maxXp} XP</Text>
                 </View>
 
                 {/* STATS GRID */}
                 <View style={styles.statsGrid}>
                     <StatCard title="Sweat Coins" value={user.coins} icon="flame" />
                     <StatCard title="Wins" value={user.wins} icon="trophy" />
-                    <StatCard title="Areas" value={user.areas} icon="map" />
-                    <StatCard title="Rank" value={user.rank} icon="medal" />
+                    <StatCard title="Territories" value={user.areas} icon="map" />
                 </View>
 
                 {/* ACHIEVEMENTS */}
@@ -72,13 +65,6 @@ export default function Profile() {
                     <Achievement title="Explorer" />
                     <Achievement title="Unstoppable" />
                 </ScrollView>
-
-                {/* RECENT ACTIVITY */}
-                <Text style={styles.sectionTitle}>Recent Activity</Text>
-                <ActivityCard text="Conquered Downtown Zone" />
-                <ActivityCard text="Reached Level 12" />
-                <ActivityCard text="Won 3 Battles Today" />
-
             </ScrollView>
         </SafeAreaView>
     )

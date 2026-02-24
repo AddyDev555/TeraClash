@@ -13,6 +13,45 @@ import {
 
 const { height } = Dimensions.get('window');
 
+const StreakBadge = ({ streak, onPress }) => {
+    const scale = useRef(new Animated.Value(1)).current;
+    const pulse = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulse, {
+                    toValue: 1.15,
+                    duration: 800,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(pulse, {
+                    toValue: 1,
+                    duration: 0,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, []);
+
+    return (
+        <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+            <View style={styles.badgeWrapper}>
+                <Animated.View
+                    style={[
+                        styles.streakRing,
+                        { transform: [{ scale: pulse }] },
+                    ]}
+                />
+                <View style={styles.streakBadge}>
+                    <Text style={styles.streakCount}>{streak}</Text>
+                    <Text style={styles.streakLabel}>Streak</Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+};
+
 const SimpleBadge = ({ count, onPress }) => {
     const scale = useRef(new Animated.Value(1)).current;
     const ring = useRef(new Animated.Value(1)).current;
@@ -74,6 +113,14 @@ const ConqueredAreasWidget = ({ areas, onAreaPress }) => {
 
     return (
         <>
+            {/* Streak Floating Left */}
+            <View style={styles.floatingLeft}>
+                <StreakBadge
+                    streak={1}
+                    onPress={() => console.log("Streak pressed")}
+                />
+            </View>
+
             {/* Floating Badge */}
             <View style={styles.floating}>
                 <SimpleBadge count={areas.length} onPress={open} />
@@ -116,6 +163,42 @@ const ConqueredAreasWidget = ({ areas, onAreaPress }) => {
 };
 
 const styles = StyleSheet.create({
+    floatingLeft: {
+        position: 'absolute',
+        bottom: 80,
+        right: 90,
+    },
+
+    streakRing: {
+        position: 'absolute',
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        borderWidth: 2,
+        borderColor: '#f97316',
+        opacity: 0.4,
+    },
+
+    streakBadge: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: '#1e293b',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    streakCount: {
+        color: '#f97316',
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+
+    streakLabel: {
+        fontSize: 8,
+        color: '#94a3b8',
+    },
+
     floating: {
         position: 'absolute',
         bottom: 80,

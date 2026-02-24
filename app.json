@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "teraclash",
-    "slug": "teraclash",
+    "name": "TeraClash",
+    "slug": "TeraClash",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/Logo.png",
-    "scheme": "teraclash",
+    "scheme": "TeraClash",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
