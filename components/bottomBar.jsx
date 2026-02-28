@@ -7,7 +7,7 @@ export default function BottomBar() {
     const pathname = usePathname();
     
     const tabs = [
-        { name: 'Home', icon: 'home', route: '/' },
+        { name: 'Home', icon: 'home', route: '/home' },
         { name: 'Analysis', icon: 'bar-chart', route: '/analysis' },
         { name: 'LeaderBoard', icon: 'trophy', route: '/leaderboard' },
     ]
