@@ -8,16 +8,66 @@ import {
     StatusBar,
     Image,
 } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default function Login() {
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const router = useRouter()
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const user = await AsyncStorage.getItem('user')
+            if (user) {
+                router.replace('/home')
+            }
+        }
+
+        checkUser()
+    }, [])
+
+    const handleLogin = async () => {
+        if (!email) {
+            alert("Please enter email")
+            return
+        }
+        else if (!password) {
+            alert("Please enter password")
+            return
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+        if (!emailRegex.test(email)) {
+            alert("Please enter a valid email address")
+            return
+        }
+
+
+        try {
+            // Dummy authentication (replace with real API later)
+            const userData = {
+                email,
+                loginTime: new Date().toISOString(),
+            }
+
+            // Save user in local storage
+            await AsyncStorage.setItem('user', JSON.stringify(userData))
+
+            console.log("User stored successfully")
+
+            // Navigate to home
+            router.replace('/home')
+
+        } catch (error) {
+            console.log("Login error:", error)
+        }
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -39,21 +89,31 @@ export default function Login() {
 
                 {/* Form */}
                 <View style={styles.form}>
+
+                    {/* EMAIL */}
+                    <Text style={styles.label}>Email Address</Text>
                     <View style={styles.inputContainer}>
                         <Ionicons name="mail" size={20} color="cyan" />
                         <TextInput
-                            placeholder="Email"
+                            placeholder="example@gmail.com"
                             placeholderTextColor="#64748B"
                             style={styles.input}
                             value={email}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            textContentType="emailAddress"
+                            autoComplete="email"
                             onChangeText={setEmail}
                         />
                     </View>
 
+                    {/* PASSWORD */}
+                    <Text style={styles.label}>Password</Text>
                     <View style={styles.inputContainer}>
                         <Ionicons name="lock-closed" size={20} color="cyan" />
                         <TextInput
-                            placeholder="Password"
+                            placeholder="••••••••"
                             placeholderTextColor="#64748B"
                             secureTextEntry
                             style={styles.input}
@@ -65,35 +125,15 @@ export default function Login() {
                     {/* Login Button */}
                     <TouchableOpacity
                         style={styles.loginButton}
-                        onPress={() => router.replace('/home')}
+                        onPress={handleLogin}
                     >
                         <Text style={styles.loginText}>ENTER ARENA</Text>
                     </TouchableOpacity>
 
-                    {/* Divider */}
-                    {/* <View style={styles.dividerContainer}>
-                        <View style={styles.divider} />
-                        <Text style={styles.orText}>OR</Text>
-                        <View style={styles.divider} />
-                    </View> */}
-
-                    {/* Social Buttons */}
-                    {/* <View style={styles.socialRow}>
-                        <TouchableOpacity style={styles.socialBtn}>
-                            <Ionicons name="logo-google" size={20} color="white" />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.socialBtn}>
-                            <Ionicons name="logo-apple" size={20} color="white" />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.socialBtn}>
-                            <Ionicons name="logo-facebook" size={20} color="white" />
-                        </TouchableOpacity>
-                    </View> */}
-
                     <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
-                        <Text style={styles.signupText}>New warrior? <Text style={{ color: 'cyan' }}>Create Account</Text></Text>
+                        <Text style={styles.signupText}>
+                            New warrior? <Text style={{ color: 'cyan' }}>Create Account</Text>
+                        </Text>
                     </TouchableOpacity>
 
                 </View>
@@ -129,6 +169,13 @@ const styles = StyleSheet.create({
     },
     form: {
         width: '100%'
+    },
+    label: {
+        color: '#CBD5E1',
+        fontSize: 13,
+        marginBottom: 6,
+        marginLeft: 4,
+        fontWeight: '500'
     },
     inputContainer: {
         flexDirection: 'row',

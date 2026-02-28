@@ -7,6 +7,7 @@ import {
     ScrollView,
     ImageBackground,
     Switch,
+    Modal
 } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -14,6 +15,7 @@ import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { BlurView } from 'expo-blur'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const SettingRow = ({ title, icon, value, onValueChange }) => (
     <View style={styles.settingRow}>
@@ -81,8 +83,28 @@ export default function Profile() {
     const [privacyMode, setPrivacyMode] = React.useState(false)
     const [darkMode, setDarkMode] = React.useState(true)
     const [notificationsEnabled, setNotificationsEnabled] = React.useState(true)
+    const [deleteModalVisible, setDeleteModalVisible] = React.useState(false)
 
     const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            await AsyncStorage.removeItem('user')
+            router.replace('/(auth)/login')
+        } catch (error) {
+            console.log("Logout error:", error)
+        }
+    }
+
+    const handleDeleteAccount = async () => {
+        try {
+            await AsyncStorage.removeItem('user')
+            setDeleteModalVisible(false)
+            router.replace('/(auth)/login')
+        } catch (error) {
+            console.log("Delete error:", error)
+        }
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -194,7 +216,67 @@ export default function Profile() {
                     </View>
                 </View>
 
+                {/* Account Actions */}
+                <View style={styles.accountActions}>
+
+                    <TouchableOpacity
+                        style={styles.logoutButton}
+                        onPress={handleLogout}
+                    >
+                        <Ionicons name="log-out-outline" size={20} color="#0F172A" />
+                        <Text style={styles.logoutText}>Logout</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.deleteButton}
+                        onPress={() => setDeleteModalVisible(true)}
+                    >
+                        <Ionicons name="trash-outline" size={20} color="white" />
+                        <Text style={styles.deleteText}>Delete Account</Text>
+                    </TouchableOpacity>
+
+                </View>
+
             </ScrollView>
+            {/* Delete Confirmation Modal */}
+            <Modal
+                visible={deleteModalVisible}
+                transparent
+                animationType="fade"
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+
+                        <Ionicons name="warning-outline" size={40} color="#DC2626" />
+                        <Text style={styles.modalTitle}>
+                            Delete Account?
+                        </Text>
+
+                        <Text style={styles.modalText}>
+                            This action is permanent and cannot be undone.
+                        </Text>
+
+                        <View style={styles.modalButtons}>
+
+                            <TouchableOpacity
+                                style={styles.cancelButton}
+                                onPress={() => setDeleteModalVisible(false)}
+                            >
+                                <Text style={styles.cancelText}>Cancel</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.confirmDeleteButton}
+                                onPress={handleDeleteAccount}
+                            >
+                                <Text style={styles.confirmDeleteText}>Delete</Text>
+                            </TouchableOpacity>
+
+                        </View>
+
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     )
 }
@@ -379,5 +461,103 @@ const styles = StyleSheet.create({
     settingText: {
         color: 'white',
         fontSize: 14
+    },
+
+    accountActions: {
+        paddingHorizontal: 16,
+        marginTop: 5,
+        marginBottom: 60
+    },
+
+    logoutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        backgroundColor: 'white',
+        paddingVertical: 12,
+        borderRadius: 14,
+        marginBottom: 14
+    },
+
+    logoutText: {
+        fontWeight: 'bold',
+        color: '#0F172A',
+        fontSize: 14
+    },
+
+    deleteButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        backgroundColor: '#DC2626',
+        paddingVertical: 12,
+        borderRadius: 14
+    },
+
+    deleteText: {
+        fontWeight: 'bold',
+        color: 'white',
+        fontSize: 14
+    },
+
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20
+    },
+
+    modalContainer: {
+        width: '100%',
+        backgroundColor: '#1E293B',
+        borderRadius: 20,
+        padding: 24,
+        alignItems: 'center'
+    },
+
+    modalTitle: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginTop: 12
+    },
+
+    modalText: {
+        color: '#94A3B8',
+        textAlign: 'center',
+        marginTop: 8,
+        marginBottom: 20
+    },
+
+    modalButtons: {
+        flexDirection: 'row',
+        gap: 12
+    },
+
+    cancelButton: {
+        backgroundColor: '#334155',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 12
+    },
+
+    cancelText: {
+        color: 'white',
+        fontWeight: '600'
+    },
+
+    confirmDeleteButton: {
+        backgroundColor: '#DC2626',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 12
+    },
+
+    confirmDeleteText: {
+        color: 'white',
+        fontWeight: '600'
     },
 })
