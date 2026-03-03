@@ -33,41 +33,54 @@ export default function Login() {
 
     const handleLogin = async () => {
         if (!email) {
-            alert("Please enter email")
-            return
-        }
-        else if (!password) {
-            alert("Please enter password")
-            return
+            alert("Please enter email");
+            return;
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!password) {
+            alert("Please enter password");
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(email)) {
-            alert("Please enter a valid email address")
-            return
+            alert("Please enter a valid email address");
+            return;
         }
-
 
         try {
-            // Dummy authentication (replace with real API later)
-            const userData = {
-                email,
-                loginTime: new Date().toISOString(),
+            const response = await fetch("http://192.168.1.7:5000/api/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert(data.message || "Invalid credentials");
+                return;
             }
 
-            // Save user in local storage
-            await AsyncStorage.setItem('user', JSON.stringify(userData))
+            // ✅ Store JWT token
+            await AsyncStorage.setItem("access_token", data.access_token);
 
-            console.log("User stored successfully")
+            // ✅ Store user data
+            await AsyncStorage.setItem("user", JSON.stringify(data.user));
 
             // Navigate to home
-            router.replace('/home')
+            router.replace("/home");
 
         } catch (error) {
-            console.log("Login error:", error)
+            alert("Server error. Please try again.");
         }
-    }
+    };
 
     return (
         <SafeAreaView style={styles.container}>

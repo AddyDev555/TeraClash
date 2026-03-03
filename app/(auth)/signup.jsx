@@ -11,6 +11,7 @@ import React, { useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SignUp() {
 
@@ -32,27 +33,57 @@ export default function SignUp() {
         }))
     }
 
-    const handleSignUp = () => {
-        const { firstName, lastName, email, password, confirmPassword } = form
+    const handleSignUp = async () => {
+        const { firstName, lastName, email, password, confirmPassword } = form;
 
         if (!firstName || !lastName || !email || !password || !confirmPassword) {
-            setError('All fields are required')
-            return
+            setError("All fields are required");
+            return;
         }
 
         if (password.length < 6) {
-            setError('Password must be at least 6 characters')
-            return
+            setError("Password must be at least 6 characters");
+            return;
         }
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match')
-            return
+            setError("Passwords do not match");
+            return;
         }
 
-        setError('')
-        router.replace('/home')
-    }
+        try {
+            setError("");
+
+            const response = await fetch("http://192.168.1.7:5000/api/auth/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    firstName,
+                    lastName,
+                    email,
+                    password,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setError(data.message || "Something went wrong");
+                return;
+            }
+
+            // ✅ Use AsyncStorage instead
+            await AsyncStorage.setItem("access_token", data.access_token);
+            await AsyncStorage.setItem("user", JSON.stringify(data.user));
+
+            router.replace("/home");
+
+        } catch (error) {
+            setError("Server error. Please try again.");
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
