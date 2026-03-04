@@ -18,4 +18,4 @@ with app.app_context():
     db.create_all()
 
 if __name__ == "__main__":
-    app.run(host="192.168.1.7", port=5000, debug=True)
+    app.run(host="192.168.0.240", port=5000, debug=True)

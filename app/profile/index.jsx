@@ -13,7 +13,7 @@ import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
+import { useRouter, useLocalSearchParams } from 'expo-router'
 import { BlurView } from 'expo-blur'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
@@ -62,9 +62,11 @@ const AchievementCard = ({ item }) => (
 )
 
 export default function Profile() {
+    const { userData } = useLocalSearchParams();
+    const parsedUserData = JSON.parse(userData);
 
     const user = {
-        name: "Thia",
+        name: `${parsedUserData?.first_name || ''} ${parsedUserData?.last_name || ''}`.trim() || "Guest User",
         level: 12,
         coins: 1240,
         areas: 14,
@@ -124,13 +126,17 @@ export default function Profile() {
                     </TouchableOpacity>
 
                     <ImageBackground
-                        source={{ uri: "https://i.pravatar.cc/500" }}
+                        source={{
+                            uri: parsedUserData?.pp
+                                ? parsedUserData.pp
+                                : "https://i.pinimg.com/1200x/cf/78/fe/cf78fe788b403ff3d41784153b10d20d.jpg"
+                        }}
                         style={styles.profileImage}
                         resizeMode="cover"
                     >
 
                         {/* Blur Overlay */}
-                        <BlurView intensity={60} style={styles.blurOverlay}>
+                        <View intensity={60} style={styles.blurOverlay}>
                             {/* Top Right Edit Image Icon */}
                             <TouchableOpacity style={styles.imageEditIcon}>
                                 <Ionicons name="create-outline" size={22} color="white" />
@@ -149,7 +155,7 @@ export default function Profile() {
                                 <Text style={styles.levelText}>Level {user.level}</Text>
                             </View>
 
-                        </BlurView>
+                        </View>
                     </ImageBackground>
                 </View>
 
@@ -277,7 +283,7 @@ export default function Profile() {
                     </View>
                 </View>
             </Modal>
-        </SafeAreaView>
+        </SafeAreaView >
     )
 }
 
@@ -331,7 +337,6 @@ const styles = StyleSheet.create({
         height: '100%',
         padding: 20,
         justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0,0,0,0.2)'
     },
 
     imageEditIcon: {
@@ -359,7 +364,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 6,
         borderRadius: 20,
-        marginTop: 2,
+        marginTop: 8,
         alignSelf: 'flex-start'
     },
 

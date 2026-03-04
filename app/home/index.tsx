@@ -8,6 +8,7 @@ import Map from '@/components/map'
 import BottomBar from '@/components/bottomBar'
 import * as NavigationBar from 'expo-navigation-bar';
 import ConqueredAreasWidget from './components/info';
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import Animated, {
   useSharedValue,
@@ -18,6 +19,18 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export default function Index() {
+  const [user, setUser] = React.useState([]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = await AsyncStorage.getItem('user');
+      if (user) {
+        setUser(JSON.parse(user));
+      }
+    };
+
+    fetchUser();
+  }, [])
 
   const areas = [
     { id: '1', name: 'Central Park', description: 'A large public park in New York City.' },
@@ -88,7 +101,7 @@ export default function Index() {
       <StatusBar style="light" translucent backgroundColor="transparent" hidden />
 
       <Animated.View style={[styles.floatingHead, headerStyle]}>
-        <Navbar />
+        <Navbar user={user} />
         <HeroCards />
       </Animated.View>
 

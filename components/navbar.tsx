@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins'
 import { useRouter } from 'expo-router'
 
-export default function Navbar() {
+export default function Navbar({ user }) {
     const [showInfo, setShowInfo] = useState(false)
     const router = useRouter();
 
@@ -59,10 +59,26 @@ export default function Navbar() {
                 )}
 
                 {/* Profile */}
-                <TouchableOpacity style={styles.profile} onPress={() => router.push('/profile')}>
-                    <Text style={styles.profileText}>
-                        PR
-                    </Text>
+                <TouchableOpacity style={styles.profile} onPress={() =>
+                    router.push({
+                        pathname: '/profile',
+                        params: { userData: JSON.stringify(user) }
+                    })
+                }>
+                    {user?.pp ? (
+                        <Image
+                            source={{ uri: user.pp }}
+                            style={styles.profileImage}
+                        />
+                    ) : (
+                        <Text style={styles.profileText}>
+                            {user?.first_name && user?.last_name
+                                ? `${user.first_name[0]}${user.last_name[0]}`.toUpperCase()
+                                : user?.first_name
+                                    ? user.first_name.slice(0, 2).toUpperCase()
+                                    : 'GU'}
+                        </Text>
+                    )}
                 </TouchableOpacity>
             </View>
         </View>
@@ -140,6 +156,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderWidth: 2,
         borderColor: '#334155',
+    },
+
+    profileImage: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
     },
 
     profileText: {
