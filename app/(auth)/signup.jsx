@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API } from "@/utils/api"
 
 export default function SignUp() {
 
@@ -54,29 +55,15 @@ export default function SignUp() {
         try {
             setError("");
 
-            const response = await fetch("http://192.168.1.7:5000/api/auth/signup", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    firstName,
-                    lastName,
-                    email,
-                    password,
-                }),
-            });
+            const data = await API.post("/api/auth/signup", {
+                firstName,
+                lastName,
+                email,
+                password,
+            })
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                setError(data.message || "Something went wrong");
-                return;
-            }
-
-            // ✅ Use AsyncStorage instead
-            await AsyncStorage.setItem("access_token", data.access_token);
-            await AsyncStorage.setItem("user", JSON.stringify(data.user));
+            await AsyncStorage.setItem("access_token", data.access_token)
+            await AsyncStorage.setItem("user", JSON.stringify(data.user))
 
             router.replace("/home");
 

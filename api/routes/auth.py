@@ -32,6 +32,7 @@ def signup():
         "message": "User created successfully",
         "access_token": access_token,
         "user": {
+            "id": new_user.id,
             "first_name": new_user.first_name,
             "last_name": new_user.last_name,
             "email": new_user.email,
@@ -66,6 +67,7 @@ def login():
         "message": "Login successful",
         "access_token": access_token,
         "user": {
+            "id": user.id,
             "first_name": user.first_name,
             "last_name": user.last_name,
             "email": user.email,

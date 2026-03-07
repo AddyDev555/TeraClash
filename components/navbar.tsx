@@ -1,12 +1,23 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins'
 import { useRouter } from 'expo-router'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
-export default function Navbar({ user }) {
+const API_URL = process.env.EXPO_PUBLIC_API_URL
+
+const resolveAvatar = (pp) => {
+    if (!pp) return null
+    if (pp.startsWith("http")) return pp
+    const clean = pp.replace(/^\/+/, "")
+    return `${API_URL}/api/profile/${clean}`
+}
+
+export default function Navbar() {
+    const [user, setUser] = useState(null)
     const [showInfo, setShowInfo] = useState(false)
-    const router = useRouter();
+    const router = useRouter()
 
     const [fontsLoaded] = useFonts({
         Poppins_400Regular,
@@ -14,7 +25,29 @@ export default function Navbar({ user }) {
         Poppins_700Bold,
     })
 
+    // ── Load user from AsyncStorage on mount ──
+    useEffect(() => {
+        loadUser()
+    }, [user])
+
+    const loadUser = async () => {
+        try {
+            const raw = await AsyncStorage.getItem("user")
+            if (raw) setUser(JSON.parse(raw))
+        } catch (e) {
+            console.log("Navbar: failed to load user", e)
+        }
+    }
+
     if (!fontsLoaded) return null
+
+    const avatarUri = resolveAvatar(user?.pp)
+
+    const initials = user?.first_name && user?.last_name
+        ? `${user.first_name[0]}${user.last_name[0]}`.toUpperCase()
+        : user?.first_name
+            ? user.first_name.slice(0, 2).toUpperCase()
+            : 'GU'
 
     return (
         <View style={styles.container}>
@@ -30,56 +63,40 @@ export default function Navbar({ user }) {
             </TouchableOpacity>
 
             <View style={styles.rightSection}>
+
                 {/* Sweats Currency */}
                 <TouchableOpacity style={styles.sweatsContainer} onPress={() => {
                     setShowInfo(true)
                     setTimeout(() => setShowInfo(false), 5000)
                 }}>
                     <Ionicons name="flame" size={16} color="#facc15" />
-                    <Text style={styles.sweatsText}>
-                        10
-                    </Text>
+                    <Text style={styles.sweatsText}>10</Text>
                 </TouchableOpacity>
 
                 {/* Marketplace */}
-                <TouchableOpacity
-                    style={styles.marketplace}
-                    onPress={() => router.push('/')}
-                >
+                <TouchableOpacity style={styles.marketplace} onPress={() => router.push('/home')}>
                     <Ionicons name="cart-outline" size={18} color="cyan" />
                 </TouchableOpacity>
 
                 {showInfo && (
                     <View style={styles.popup}>
                         <Ionicons name="information-circle" size={14} color="#22d3ee" />
-                        <Text style={styles.popupText}>
-                            Earn sweat coins to unlock powerups
-                        </Text>
+                        <Text style={styles.popupText}>Earn sweat coins to unlock powerups</Text>
                     </View>
                 )}
 
                 {/* Profile */}
-                <TouchableOpacity style={styles.profile} onPress={() =>
-                    router.push({
-                        pathname: '/profile',
-                        params: { userData: JSON.stringify(user) }
-                    })
-                }>
-                    {user?.pp ? (
-                        <Image
-                            source={{ uri: user.pp }}
-                            style={styles.profileImage}
-                        />
+                <TouchableOpacity
+                    style={styles.profile}
+                    onPress={() => router.push({ pathname: '/profile' })}
+                >
+                    {avatarUri ? (
+                        <Image source={{ uri: avatarUri }} style={styles.profileImage} />
                     ) : (
-                        <Text style={styles.profileText}>
-                            {user?.first_name && user?.last_name
-                                ? `${user.first_name[0]}${user.last_name[0]}`.toUpperCase()
-                                : user?.first_name
-                                    ? user.first_name.slice(0, 2).toUpperCase()
-                                    : 'GU'}
-                        </Text>
+                        <Text style={styles.profileText}>{initials}</Text>
                     )}
                 </TouchableOpacity>
+
             </View>
         </View>
     )

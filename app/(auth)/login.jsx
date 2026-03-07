@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { API } from "@/utils/api"  // ← same import as profile page
 
 export default function Login() {
 
@@ -50,29 +51,13 @@ export default function Login() {
         }
 
         try {
-            const response = await fetch("http://192.168.0.240:5000/api/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email,
-                    password,
-                }),
-            });
+            const data = await API.post("/api/auth/login", { email, password })
 
-            const data = await response.json();
+            // ✅ Store JWT token — same key used in profile page API calls
+            await AsyncStorage.setItem("access_token", data.access_token)
 
-            if (!response.ok) {
-                alert(data.message || "Invalid credentials");
-                return;
-            }
-
-            // ✅ Store JWT token
-            await AsyncStorage.setItem("access_token", data.access_token);
-
-            // ✅ Store user data
-            await AsyncStorage.setItem("user", JSON.stringify(data.user));
+            // ✅ Store user data — same key used in profile page
+            await AsyncStorage.setItem("user", JSON.stringify(data.user))
 
             // Navigate to home
             router.replace("/home");
