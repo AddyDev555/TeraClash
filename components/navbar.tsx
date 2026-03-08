@@ -74,14 +74,14 @@ export default function Navbar() {
                 </TouchableOpacity>
 
                 {/* Marketplace */}
-                <TouchableOpacity style={styles.marketplace} onPress={() => router.push('/home')}>
+                <TouchableOpacity style={styles.marketplace} onPress={() => router.push('/shop')}>
                     <Ionicons name="cart-outline" size={18} color="cyan" />
                 </TouchableOpacity>
 
                 {showInfo && (
                     <View style={styles.popup}>
                         <Ionicons name="information-circle" size={14} color="#22d3ee" />
-                        <Text style={styles.popupText}>Earn sweat coins to unlock powerups</Text>
+                        <Text style={styles.popupText}>Earn sweat coins to unlock powerups.</Text>
                     </View>
                 )}
 

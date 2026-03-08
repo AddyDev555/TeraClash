@@ -56,6 +56,7 @@ export default function RootLayout() {
       <Toast />
       <Stack initialRouteName={initialRoute}>
         <Stack.Screen name="home" options={{ headerShown: false }} />
+        <Stack.Screen name="shop/index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
         <Stack.Screen name="analysis/index" options={{ headerShown: false }} />
