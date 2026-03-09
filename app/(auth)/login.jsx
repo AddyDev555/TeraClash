@@ -6,19 +6,20 @@ import {
     TouchableOpacity,
     SafeAreaView,
     StatusBar,
-    Image,
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { API } from "@/utils/api"  // ← same import as profile page
+import { API } from "@/utils/api"
+import Toast from 'react-native-toast-message'
 
 export default function Login() {
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [errors, setErrors] = useState({})
     const router = useRouter()
 
     useEffect(() => {
@@ -33,37 +34,39 @@ export default function Login() {
     }, [])
 
     const handleLogin = async () => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        let newErrors = {}
+
         if (!email) {
-            alert("Please enter email");
-            return;
+            newErrors.email = "Email address is required"
+        } else if (!emailRegex.test(email)) {
+            newErrors.email = "Please enter a valid email address"
         }
 
         if (!password) {
-            alert("Please enter password");
-            return;
+            newErrors.password = "Password is required"
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        setErrors(newErrors)
 
-        if (!emailRegex.test(email)) {
-            alert("Please enter a valid email address");
-            return;
-        }
+        if (Object.keys(newErrors).length > 0) return;
 
         try {
             const data = await API.post("/api/auth/login", { email, password })
 
-            // ✅ Store JWT token — same key used in profile page API calls
             await AsyncStorage.setItem("access_token", data.access_token)
-
-            // ✅ Store user data — same key used in profile page
             await AsyncStorage.setItem("user", JSON.stringify(data.user))
 
-            // Navigate to home
+            Toast.show({
+                type: "success",
+                text1: "Welcome back warrior!",
+                text2: "Let's conquer the world."
+            });
+
             router.replace("/home");
 
         } catch (error) {
-            alert("Server error. Please try again.");
+            setErrors({ general: "Invalid email or password. Please try again." })
         }
     };
 
@@ -88,9 +91,14 @@ export default function Login() {
                 {/* Form */}
                 <View style={styles.form}>
 
+                    {/* General Error */}
+                    {errors.general && (
+                        <Text style={styles.errorText}>{errors.general}</Text>
+                    )}
+
                     {/* EMAIL */}
                     <Text style={styles.label}>Email Address</Text>
-                    <View style={styles.inputContainer}>
+                    <View style={[styles.inputContainer, errors.email && styles.inputError]}>
                         <Ionicons name="mail" size={20} color="cyan" />
                         <TextInput
                             placeholder="example@gmail.com"
@@ -105,10 +113,13 @@ export default function Login() {
                             onChangeText={setEmail}
                         />
                     </View>
+                    {errors.email && (
+                        <Text style={styles.fieldError}>{errors.email}</Text>
+                    )}
 
                     {/* PASSWORD */}
                     <Text style={styles.label}>Password</Text>
-                    <View style={styles.inputContainer}>
+                    <View style={[styles.inputContainer, errors.password && styles.inputError]}>
                         <Ionicons name="lock-closed" size={20} color="cyan" />
                         <TextInput
                             placeholder="••••••••"
@@ -119,6 +130,9 @@ export default function Login() {
                             onChangeText={setPassword}
                         />
                     </View>
+                    {errors.password && (
+                        <Text style={styles.fieldError}>{errors.password}</Text>
+                    )}
 
                     {/* Login Button */}
                     <TouchableOpacity
@@ -182,7 +196,12 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         paddingHorizontal: 14,
         paddingVertical: 8,
-        marginBottom: 16
+        marginBottom: 4,
+        borderWidth: 1,
+        borderColor: 'transparent'
+    },
+    inputError: {
+        borderColor: '#EF4444'
     },
     input: {
         flex: 1,
@@ -209,5 +228,18 @@ const styles = StyleSheet.create({
         marginTop: 20,
         textAlign: 'center',
         color: '#94A3B8'
+    },
+    errorText: {
+        color: '#EF4444',
+        textAlign: 'center',
+        marginBottom: 10,
+        fontSize: 13
+    },
+    fieldError: {
+        color: '#EF4444',
+        fontSize: 11,
+        marginLeft: 4,
+        marginBottom: 8,
+        marginTop: -2
     }
 })

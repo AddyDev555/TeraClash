@@ -6,6 +6,8 @@ import {
     TouchableOpacity,
     SafeAreaView,
     StatusBar,
+    Modal,
+    ScrollView
 } from 'react-native'
 import React, { useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -13,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API } from "@/utils/api"
+import Toast from 'react-native-toast-message'
 
 export default function SignUp() {
 
@@ -24,7 +27,10 @@ export default function SignUp() {
         confirmPassword: ''
     })
 
-    const [error, setError] = useState('')
+    const [acceptedPolicy, setAcceptedPolicy] = useState(false)
+    const [showPolicy, setShowPolicy] = useState(false)
+
+    const [errors, setErrors] = useState({})
     const router = useRouter()
 
     const handleChange = (key, value) => {
@@ -37,23 +43,41 @@ export default function SignUp() {
     const handleSignUp = async () => {
         const { firstName, lastName, email, password, confirmPassword } = form;
 
-        if (!firstName || !lastName || !email || !password || !confirmPassword) {
-            setError("All fields are required");
-            return;
+        let newErrors = {}
+
+        if (!firstName) {
+            newErrors.firstName = "First name is required"
         }
 
-        if (password.length < 6) {
-            setError("Password must be at least 6 characters");
-            return;
+        if (!lastName) {
+            newErrors.lastName = "Last name is required"
         }
 
-        if (password !== confirmPassword) {
-            setError("Passwords do not match");
-            return;
+        if (!email) {
+            newErrors.email = "Email address is required"
         }
+
+        if (!password) {
+            newErrors.password = "Password is required"
+        } else if (password.length < 6) {
+            newErrors.password = "Password must be at least 6 characters"
+        }
+
+        if (!confirmPassword) {
+            newErrors.confirmPassword = "Confirm your password"
+        } else if (password !== confirmPassword) {
+            newErrors.confirmPassword = "Passwords do not match"
+        }
+
+        if (!acceptedPolicy) {
+            newErrors.policy = "You must accept the Privacy Policy"
+        }
+
+        setErrors(newErrors)
+
+        if (Object.keys(newErrors).length > 0) return;
 
         try {
-            setError("");
 
             const data = await API.post("/api/auth/signup", {
                 firstName,
@@ -65,12 +89,18 @@ export default function SignUp() {
             await AsyncStorage.setItem("access_token", data.access_token)
             await AsyncStorage.setItem("user", JSON.stringify(data.user))
 
-            router.replace("/home");
+            Toast.show({
+                type: "success",
+                text1: "Your career begins Warrior!",
+                text2: "Let's conquer the world."
+            });
+
+            router.replace("/home")
 
         } catch (error) {
-            setError("Server error. Please try again.");
+            setErrors({ general: "Server error. Please try again." })
         }
-    };
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -95,11 +125,16 @@ export default function SignUp() {
                 {/* Form */}
                 <View style={styles.form}>
 
+                    {/* General Error */}
+                    {errors.general && (
+                        <Text style={styles.errorText}>{errors.general}</Text>
+                    )}
+
                     {/* First + Last Name Row */}
                     <View style={styles.row}>
                         <View style={styles.halfField}>
                             <Text style={styles.label}>First Name</Text>
-                            <View style={styles.inputContainer}>
+                            <View style={[styles.inputContainer, errors.firstName && styles.inputError]}>
                                 <Ionicons name="person" size={20} color="cyan" />
                                 <TextInput
                                     placeholder="e.g. John"
@@ -109,11 +144,14 @@ export default function SignUp() {
                                     onChangeText={(text) => handleChange('firstName', text)}
                                 />
                             </View>
+                            {errors.firstName && (
+                                <Text style={styles.fieldError}>{errors.firstName}</Text>
+                            )}
                         </View>
 
                         <View style={styles.halfField}>
                             <Text style={styles.label}>Last Name</Text>
-                            <View style={styles.inputContainer}>
+                            <View style={[styles.inputContainer, errors.lastName && styles.inputError]}>
                                 <Ionicons name="person-outline" size={20} color="cyan" />
                                 <TextInput
                                     placeholder="e.g. Carter"
@@ -123,12 +161,15 @@ export default function SignUp() {
                                     onChangeText={(text) => handleChange('lastName', text)}
                                 />
                             </View>
+                            {errors.lastName && (
+                                <Text style={styles.fieldError}>{errors.lastName}</Text>
+                            )}
                         </View>
                     </View>
 
                     {/* Email */}
                     <Text style={styles.label}>Email Address</Text>
-                    <View style={styles.inputContainer}>
+                    <View style={[styles.inputContainer, errors.email && styles.inputError]}>
                         <Ionicons name="mail" size={20} color="cyan" />
                         <TextInput
                             placeholder="e.g. john@email.com"
@@ -140,10 +181,13 @@ export default function SignUp() {
                             onChangeText={(text) => handleChange('email', text)}
                         />
                     </View>
+                    {errors.email && (
+                        <Text style={styles.fieldError}>{errors.email}</Text>
+                    )}
 
                     {/* Password */}
                     <Text style={styles.label}>Password</Text>
-                    <View style={styles.inputContainer}>
+                    <View style={[styles.inputContainer, errors.password && styles.inputError]}>
                         <Ionicons name="lock-closed" size={20} color="cyan" />
                         <TextInput
                             placeholder="Minimum 6 characters"
@@ -154,10 +198,13 @@ export default function SignUp() {
                             onChangeText={(text) => handleChange('password', text)}
                         />
                     </View>
+                    {errors.password && (
+                        <Text style={styles.fieldError}>{errors.password}</Text>
+                    )}
 
                     {/* Confirm Password */}
                     <Text style={styles.label}>Confirm Password</Text>
-                    <View style={styles.inputContainer}>
+                    <View style={[styles.inputContainer, errors.confirmPassword && styles.inputError]}>
                         <Ionicons name="lock-closed-outline" size={20} color="cyan" />
                         <TextInput
                             placeholder="Re-enter password"
@@ -168,11 +215,34 @@ export default function SignUp() {
                             onChangeText={(text) => handleChange('confirmPassword', text)}
                         />
                     </View>
+                    {errors.confirmPassword && (
+                        <Text style={styles.fieldError}>{errors.confirmPassword}</Text>
+                    )}
 
-                    {/* Error */}
-                    {error ? (
-                        <Text style={styles.errorText}>{error}</Text>
-                    ) : null}
+                    <View style={styles.policyRow}>
+                        <TouchableOpacity
+                            style={styles.checkbox}
+                            onPress={() => setAcceptedPolicy(!acceptedPolicy)}
+                        >
+                            {acceptedPolicy && (
+                                <Ionicons name="checkmark" size={16} color="black" />
+                            )}
+                        </TouchableOpacity>
+
+                        <Text style={styles.policyText}>
+                            I have read the{" "}
+                            <Text
+                                style={styles.policyLink}
+                                onPress={() => setShowPolicy(true)}
+                            >
+                                Privacy Policy
+                            </Text>
+                        </Text>
+
+                    </View>
+                    {errors.policy && (
+                        <Text style={styles.fieldError}>{errors.policy}</Text>
+                    )}
 
                     {/* Button */}
                     <TouchableOpacity
@@ -194,6 +264,46 @@ export default function SignUp() {
                 </View>
 
             </LinearGradient>
+
+            <Modal
+                visible={showPolicy}
+                animationType="slide"
+                transparent={true}
+            >
+
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+
+                        <Text style={styles.modalTitle}>Privacy Policy</Text>
+
+                        <ScrollView>
+
+                            <Text style={styles.modalText}>
+                                We respect your privacy. Your personal information such as
+                                name, email, and account activity will only be used for
+                                providing and improving the TeraClash platform.
+
+                                We do not sell or share your personal information with
+                                third parties without consent.
+
+                                By using this application, you agree to our data
+                                collection and usage policies for authentication,
+                                analytics, and improving user experience.
+                            </Text>
+
+                        </ScrollView>
+
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setShowPolicy(false)}
+                        >
+                            <Text style={{ color: "white" }}>Close</Text>
+                        </TouchableOpacity>
+
+                    </View>
+                </View>
+
+            </Modal>
         </SafeAreaView>
     )
 }
@@ -247,12 +357,18 @@ const styles = StyleSheet.create({
         backgroundColor: '#1E293B',
         borderRadius: 14,
         paddingHorizontal: 14,
-        paddingVertical: 8,
-        marginBottom: 16
+        paddingVertical: 5,
+        marginBottom: 4,
+        borderWidth: 1,
+        borderColor: 'transparent'
+    },
+    inputError: {
+        borderColor: '#EF4444'
     },
     input: {
         color: 'white',
-        marginLeft: 10
+        marginLeft: 10,
+        flex: 1
     },
     loginButton: {
         backgroundColor: 'cyan',
@@ -280,5 +396,74 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: 10,
         fontSize: 13
+    },
+    fieldError: {
+        color: '#EF4444',
+        fontSize: 11,
+        marginLeft: 4,
+        marginBottom: 8,
+        marginTop: -2
+    },
+    policyRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 8,
+        marginTop: 8,
+        marginLeft: 8
+    },
+    checkbox: {
+        width: 20,
+        height: 20,
+        borderRadius: 4,
+        borderWidth: 2,
+        borderColor: "cyan",
+        marginRight: 8,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "cyan"
+    },
+
+    policyText: {
+        color: "#CBD5E1",
+        fontSize: 13
+    },
+
+    policyLink: {
+        color: "cyan",
+        textDecorationLine: "underline"
+    },
+
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.6)",
+        justifyContent: "center",
+        padding: 20
+    },
+
+    modalContent: {
+        backgroundColor: "#1E293B",
+        borderRadius: 12,
+        padding: 20,
+        maxHeight: "70%"
+    },
+
+    modalTitle: {
+        fontSize: 18,
+        color: "white",
+        fontWeight: "bold",
+        marginBottom: 10
+    },
+
+    modalText: {
+        color: "#CBD5E1",
+        lineHeight: 20
+    },
+
+    closeButton: {
+        backgroundColor: "cyan",
+        padding: 10,
+        borderRadius: 8,
+        alignItems: "center",
+        marginTop: 15
     }
 })

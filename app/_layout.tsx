@@ -53,7 +53,6 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Toast />
       <Stack initialRouteName={initialRoute}>
         <Stack.Screen name="home" options={{ headerShown: false }} />
         <Stack.Screen name="shop/index" options={{ headerShown: false }} />
@@ -64,6 +63,7 @@ export default function RootLayout() {
         <Stack.Screen name="profile/index" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
+      <Toast />
     </ThemeProvider>
   );
 }
