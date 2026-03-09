@@ -7,7 +7,8 @@ import {
     SafeAreaView,
     StatusBar,
     Modal,
-    ScrollView
+    ScrollView,
+    Image
 } from 'react-native'
 import React, { useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -29,6 +30,8 @@ export default function SignUp() {
 
     const [acceptedPolicy, setAcceptedPolicy] = useState(false)
     const [showPolicy, setShowPolicy] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
     const [errors, setErrors] = useState({})
     const router = useRouter()
@@ -113,10 +116,12 @@ export default function SignUp() {
 
                 {/* Header */}
                 <View style={styles.header}>
-                    <Ionicons name="flash" size={48} color="cyan" />
-                    <Text style={styles.title}>
-                        Tera<Text style={{ color: 'cyan' }}>Clash</Text>
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Image source={require('@/assets/images/Logo.png')} style={styles.logo} />
+                        <Text style={styles.title}>
+                            Tera<Text style={{ color: 'cyan' }}>Clash</Text>
+                        </Text>
+                    </View>
                     <Text style={styles.subtitle}>
                         Track. Compete. Conquer.
                     </Text>
@@ -187,34 +192,56 @@ export default function SignUp() {
 
                     {/* Password */}
                     <Text style={styles.label}>Password</Text>
+
                     <View style={[styles.inputContainer, errors.password && styles.inputError]}>
                         <Ionicons name="lock-closed" size={20} color="cyan" />
+
                         <TextInput
                             placeholder="Minimum 6 characters"
                             placeholderTextColor="#64748B"
-                            secureTextEntry
+                            secureTextEntry={!showPassword}
                             style={styles.input}
                             value={form.password}
                             onChangeText={(text) => handleChange('password', text)}
                         />
+
+                        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                            <Ionicons
+                                name={showPassword ? "eye-off" : "eye"}
+                                size={20}
+                                color="#94A3B8"
+                            />
+                        </TouchableOpacity>
                     </View>
+
                     {errors.password && (
                         <Text style={styles.fieldError}>{errors.password}</Text>
                     )}
 
                     {/* Confirm Password */}
                     <Text style={styles.label}>Confirm Password</Text>
+
                     <View style={[styles.inputContainer, errors.confirmPassword && styles.inputError]}>
                         <Ionicons name="lock-closed-outline" size={20} color="cyan" />
+
                         <TextInput
                             placeholder="Re-enter password"
                             placeholderTextColor="#64748B"
-                            secureTextEntry
+                            secureTextEntry={!showConfirmPassword}
                             style={styles.input}
                             value={form.confirmPassword}
                             onChangeText={(text) => handleChange('confirmPassword', text)}
                         />
+
+                        <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                            <Ionicons
+                                name={showConfirmPassword ? "eye-off" : "eye"}
+                                size={20}
+                                color="#94A3B8"
+                            />
+                        </TouchableOpacity>
                     </View>
+
                     {errors.confirmPassword && (
                         <Text style={styles.fieldError}>{errors.confirmPassword}</Text>
                     )}
@@ -326,11 +353,16 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontWeight: 'bold',
         color: 'white',
-        marginTop: 10
     },
     subtitle: {
         color: '#94A3B8',
         marginTop: 6
+    },
+    logo: {
+        width: 42,
+        height: 42,
+        marginRight: 10,
+        borderRadius: 8,
     },
     form: {
         width: '100%'

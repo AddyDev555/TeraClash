@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
     container: {
         paddingHorizontal: 25,
         paddingVertical: 15,
+        paddingTop: 25,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -195,7 +196,6 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         borderRadius: 20,
         borderWidth: 1,
-        marginRight: 5,
         borderColor: '#334155',
         shadowColor: '#000',
         shadowOpacity: 0.2,

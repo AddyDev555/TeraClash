@@ -18,15 +18,7 @@ const leaderboardData = [
   { id: 3, name: "Aditya", level: 13, steps: 10900, territories: 12, avatar: "https://i.pravatar.cc/150?img=3" },
   { id: 4, name: "Arjun", level: 11, steps: 8320, territories: 5, avatar: "https://i.pravatar.cc/150?img=4" },
   { id: 5, name: "Meera", level: 10, steps: 7980, territories: 2, avatar: "https://i.pravatar.cc/150?img=5" },
-  { id: 6, name: "Dev", level: 9, steps: 7020, territories: 3, avatar: "https://i.pravatar.cc/150?img=6" },
-  { id: 7, name: "Dev", level: 9, steps: 7020, territories: 3, avatar: "https://i.pravatar.cc/150?img=6" },
-  { id: 8, name: "Dev", level: 9, steps: 7020, territories: 3, avatar: "https://i.pravatar.cc/150?img=6" },
-  { id: 9, name: "Dev", level: 9, steps: 7020, territories: 3, avatar: "https://i.pravatar.cc/150?img=6" },
-  { id: 10, name: "Dev", level: 9, steps: 7020, territories: 3, avatar: "https://i.pravatar.cc/150?img=6" },
-  { id: 11, name: "Dev", level: 9, steps: 7020, territories: 3, avatar: "https://i.pravatar.cc/150?img=6" },
-  { id: 12, name: "Dev", level: 9, steps: 7020, territories: 3, avatar: "https://i.pravatar.cc/150?img=6" },
-  { id: 13, name: "Dev", level: 9, steps: 7020, territories: 3, avatar: "https://i.pravatar.cc/150?img=6" },
-  { id: 14, name: "Dev", level: 9, steps: 7020, territories: 3, avatar: "https://i.pravatar.cc/150?img=6" },
+  { id: 14, name: "Dev", level: 9, steps: 7020, territories: 3, avatar: "https://i.pravatar.cc/150?img=6" }
 ];
 
 export default function Leaderboard() {

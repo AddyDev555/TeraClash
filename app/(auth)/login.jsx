@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     SafeAreaView,
     StatusBar,
+    Image
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -21,6 +22,7 @@ export default function Login() {
     const [password, setPassword] = useState('')
     const [errors, setErrors] = useState({})
     const router = useRouter()
+    const [showPassword, setShowPassword] = useState(false)
 
     useEffect(() => {
         const checkUser = async () => {
@@ -81,8 +83,14 @@ export default function Login() {
 
                 {/* Logo / Title */}
                 <View style={styles.header}>
-                    <Ionicons name="flash" size={48} color="cyan" />
-                    <Text style={styles.title}>Tera<Text style={{ color: 'cyan' }}>Clash</Text></Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Image
+                            source={require('@/assets/images/Logo.png')}
+                            style={styles.logo}
+                            resizeMode="contain"
+                        />
+                        <Text style={styles.title}>Tera<Text style={{ color: 'cyan' }}>Clash</Text></Text>
+                    </View>
                     <Text style={styles.subtitle}>
                         Welcome back, warrior!
                     </Text>
@@ -119,17 +127,30 @@ export default function Login() {
 
                     {/* PASSWORD */}
                     <Text style={styles.label}>Password</Text>
+
                     <View style={[styles.inputContainer, errors.password && styles.inputError]}>
+
                         <Ionicons name="lock-closed" size={20} color="cyan" />
+
                         <TextInput
                             placeholder="••••••••"
                             placeholderTextColor="#64748B"
-                            secureTextEntry
+                            secureTextEntry={!showPassword}
                             style={styles.input}
                             value={password}
                             onChangeText={setPassword}
                         />
+
+                        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                            <Ionicons
+                                name={showPassword ? "eye-off" : "eye"}
+                                size={20}
+                                color="#94A3B8"
+                            />
+                        </TouchableOpacity>
+
                     </View>
+
                     {errors.password && (
                         <Text style={styles.fieldError}>{errors.password}</Text>
                     )}
@@ -173,11 +194,16 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontWeight: 'bold',
         color: 'white',
-        marginTop: 10
     },
     subtitle: {
-        color: '#94A3B8',
+        color: '#d2e4fd',
         marginTop: 6
+    },
+    logo: {
+        width: 42,
+        height: 42,
+        marginRight: 10,
+        borderRadius: 8,
     },
     form: {
         width: '100%'
