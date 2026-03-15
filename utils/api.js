@@ -2,6 +2,7 @@ const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 async function apiRequest(endpoint, method = "GET", data = null, token = null) {
     try {
+        console.log(`${BASE_URL}${endpoint}`);
         const config = {
             method,
             headers: {

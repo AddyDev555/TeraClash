@@ -91,7 +91,7 @@ const SimpleBadge = ({ count, onPress }) => {
     );
 };
 
-const ConqueredAreasWidget = ({ areas, onAreaPress }) => {
+const ConqueredAreasWidget = ({ areas, onAreaPress, userInfo }) => {
     const [visible, setVisible] = useState(false);
     const translateY = useRef(new Animated.Value(300)).current;
 
@@ -116,14 +116,14 @@ const ConqueredAreasWidget = ({ areas, onAreaPress }) => {
             {/* Streak Floating Left */}
             <View style={styles.floatingLeft}>
                 <StreakBadge
-                    streak={1}
+                    streak={userInfo.streak}
                     onPress={() => console.log("Streak pressed")}
                 />
             </View>
 
             {/* Floating Badge */}
             <View style={styles.floating}>
-                <SimpleBadge count={areas.length} onPress={open} />
+                <SimpleBadge count={userInfo.areas_captured} onPress={open} />
             </View>
 
             {/* Bottom Sheet */}
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     floatingLeft: {
         position: 'absolute',
         bottom: 80,
-        right: 90,
+        left: 16,
     },
 
     streakRing: {
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     floating: {
         position: 'absolute',
         bottom: 80,
-        right: 16,
+        left: 85,
     },
 
     badgeWrapper: {

@@ -4,11 +4,13 @@ import Navbar from '@/components/navbar'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import HeroCards from './components/hero'
+import SceneManager from '@/components/sceneManager'
 import Map from '@/components/map'
 import BottomBar from '@/components/bottomBar'
 import * as NavigationBar from 'expo-navigation-bar';
 import ConqueredAreasWidget from './components/info';
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { API } from "@/utils/api"
 
 import Animated, {
   useSharedValue,
@@ -20,6 +22,7 @@ import Animated, {
 
 export default function Index() {
   const [user, setUser] = React.useState([]);
+  const [userInfo, setUserInfo] = React.useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -29,8 +32,34 @@ export default function Index() {
       }
     };
 
+    const fetchUserInfo = async () => {
+      try {
+
+        const storedUser = await AsyncStorage.getItem("user");
+
+        if (!storedUser) {
+          console.log("No user found in storage");
+          return null;
+        }
+
+        const parsedUser = JSON.parse(storedUser);
+        const userId = parsedUser.id;
+        const response = await API.get(`/api/user_info/${userId}`);
+        const userInfo = response;
+        setUserInfo(userInfo);
+
+      } catch (error) {
+        console.log(error);
+        return null;
+
+      }
+    };
+
     fetchUser();
+    fetchUserInfo();
   }, [])
+
+
 
   const areas = [
     { id: '1', name: 'Central Park', description: 'A large public park in New York City.' },
@@ -101,7 +130,7 @@ export default function Index() {
       <StatusBar style="light" translucent backgroundColor="transparent" hidden />
 
       <Animated.View style={[styles.floatingHead, headerStyle]}>
-        <Navbar user={user} />
+        <Navbar userInfo={userInfo} />
         <HeroCards />
       </Animated.View>
 
@@ -112,9 +141,12 @@ export default function Index() {
       <Animated.View style={widgetStyle}>
         <ConqueredAreasWidget
           areas={areas}
+          userInfo={userInfo}
           onAreaPress={() => console.log("Area pressed")}
         />
       </Animated.View>
+
+      <SceneManager scene="appTour" user={user}/>
 
       <Animated.View style={bottomBarStyle}>
         <BottomBar />

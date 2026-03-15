@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token
-from models import db, User
+from models import db, User, UserInfo
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -24,6 +24,11 @@ def signup():
     new_user.set_password(password)
 
     db.session.add(new_user)
+    db.session.commit()
+
+    # Create a default user info entry
+    new_user_info = UserInfo(user_id=new_user.id)
+    db.session.add(new_user_info)
     db.session.commit()
 
     access_token = create_access_token(identity=new_user.id)

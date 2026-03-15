@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
+import { useRouter, useLocalSearchParams } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as ImagePicker from 'expo-image-picker'
 import { API } from "@/utils/api"
@@ -99,6 +99,8 @@ const SettingRow = ({ title, icon, value, onValueChange }) => (
 ───────────────────────────────────────────── */
 export default function Profile() {
     const router = useRouter()
+    const { userInfo } = useLocalSearchParams()
+    const parsedUserInfo = userInfo ? JSON.parse(userInfo) : null
 
     // ── All display state sourced from AsyncStorage ──
     const [userId, setUserId] = useState(null)
@@ -282,7 +284,7 @@ export default function Profile() {
                             </View>
 
                             <View style={styles.levelBadge}>
-                                <Text style={styles.levelText}>Level 12</Text>
+                                <Text style={styles.levelText}>Level {parsedUserInfo.user_level}</Text>
                             </View>
 
                         </View>
@@ -293,9 +295,9 @@ export default function Profile() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Stats</Text>
                     <View style={styles.statsGrid}>
-                        <StatCard title="Total Steps" value="2,000" icon="walk" />
-                        <StatCard title="Sweat Coins" value="1,240" icon="flame" />
-                        <StatCard title="Territories" value="14" icon="map" />
+                        <StatCard title="Total Steps" value={parsedUserInfo.total_steps} icon="walk" />
+                        <StatCard title="Sweat Coins" value={parsedUserInfo.sweat_coins} icon="flame" />
+                        <StatCard title="Territories" value={parsedUserInfo.areas_captured} icon="map" />
                     </View>
                 </View>
 
