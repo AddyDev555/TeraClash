@@ -6,14 +6,12 @@ import { Ionicons } from '@expo/vector-icons'
 const mascotImages = {
     hi: require('../assets/mascot/hi.png'),
     normal: require('../assets/mascot/normal.png'),
-    builder: require('../assets/mascot/builder.png'),
     charm: require('../assets/mascot/charm.png'),
-
 }
 
 export default function Mascot({
     message,
-    mood = "hi",
+    mood = "normal",
     onNext,
     onPrev,
     onEnd,

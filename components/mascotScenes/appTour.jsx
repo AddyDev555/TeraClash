@@ -5,29 +5,44 @@ export default function AppTour({ onFinish, user }) {
     const steps = [
     {
         mood: "hi",
-        message: `Hello ${user.first_name} ${user.last_name} 👋 Welcome to the TeraClash Arena!`,
+        message: `Hello ${user.first_name} 👋 Welcome to the TeraClash`,
         highlight: null
     },
     {
         mood: "normal",
-        message: "Let's have a quick tour of the App!",
-        highlight: null 
-    },
-    {
-        mood: "builder",
         message: "I Tracks Daily Steps, KM Walked, and Calories. 🏃‍♂️",
         highlight: { x: 20, y: 95, width: 320, height: 38, borderColor: 'cyan' }
     },
     {
+        mood: "normal",
+        message: "You'll see your conquered Arenas on the Map! 🗺️",
+        highlight: { x: 20, y: 150, width: 320, height: 550, borderColor: 'cyan' }
+    },
+    {
         mood: "charm",
         message: "Collect Sweats to unlock Powerups, Arenas and more! 💪",
-        highlight: { x: 20, y: 200, width: 180, height: 55, borderColor: 'cyan' }
+        highlight: { x: 200, y: 38, width: 40, height: 30, borderColor: 'cyan' }
     },
     {
         mood: "normal",
         message: "Shop for powerups from the Store using sweats! 🛒",
-        highlight: { x: 20, y: 200, width: 180, height: 55, borderColor: 'cyan' }
-    }
+        highlight: { x: 253, y: 38, width: 40, height: 30, borderColor: 'cyan' }
+    },
+    {
+        mood: "hii",
+        message: "Manage your profile from the Profile Page!",
+        highlight: { x: 300, y: 38, width: 35, height: 30, borderColor: 'cyan' }
+    },
+    {
+        mood: "normal",
+        message: "See in-depth stats and history from Analysis Page!",
+        highlight: { x: 140, y: 720, width: 80, height: 35, borderColor: 'cyan' }
+    },
+    {
+        mood: "normal",
+        message: "Stay motivated to see yourself on the leaderboard page 🏆",
+        highlight: { x: 255, y: 720, width: 80, height: 35, borderColor: 'cyan' }
+    },
 ]
 
     const [step, setStep] = useState(0)
