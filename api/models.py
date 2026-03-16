@@ -70,3 +70,64 @@ class UserInfo(db.Model):
             "sweat_coins": self.sweat_coins,
             "last_updated": self.last_updated.isoformat() if self.last_updated else None
         }
+        
+class UserLocation(db.Model):
+    __tablename__ = "user_locations"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    area_name = db.Column(db.String(100), nullable=False)
+    timestamp = db.Column(db.DateTime, server_default=db.func.now())
+
+    user = db.relationship("User", backref="locations")
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "area_name": self.area_name,
+            "timestamp": self.timestamp.isoformat() if self.timestamp else None
+        }
+
+class TrackLocation(db.Model):
+    __tablename__ = "track_locations"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    timestamp = db.Column(db.DateTime, server_default=db.func.now())
+    
+    user = db.relationship("User", backref="locations")
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "timestamp": self.timestamp.isoformat() if self.timestamp else None
+        }
+
+class Arena(db.Model):
+    __tablename__ = "arena"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    area_radius = db.Column(db.Float, nullable=False)
+    
+    user = db.relationship("User", backref="locations")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "name": self.name,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "area_radius": self.area_radius
+        }
