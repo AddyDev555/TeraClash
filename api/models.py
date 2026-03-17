@@ -100,7 +100,7 @@ class TrackLocation(db.Model):
     longitude = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, server_default=db.func.now())
     
-    user = db.relationship("User", backref="locations")
+    user = db.relationship("User", backref="track")
     
     def to_dict(self):
         return {
@@ -120,7 +120,7 @@ class Arena(db.Model):
     longitude = db.Column(db.Float, nullable=False)
     area_radius = db.Column(db.Float, nullable=False)
     
-    user = db.relationship("User", backref="locations")
+    user = db.relationship("User", backref="arena")
 
     def to_dict(self):
         return {

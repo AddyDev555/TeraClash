@@ -23,6 +23,7 @@ import Animated, {
 export default function Index() {
   const [user, setUser] = React.useState([]);
   const [userInfo, setUserInfo] = React.useState([]);
+  const [userLocation, setUserLocation] = React.useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -55,9 +56,22 @@ export default function Index() {
       }
     };
 
-    fetchUser();
-    fetchUserInfo();
-  }, [])
+    const allUserLocation = async () => {
+      try {
+        const response = await API.get(`/api/locations`);
+        const userLoc = response;
+        setUserLocation(userLoc);
+      }
+      catch (error) {
+        console.log(error);
+        return null;
+      }
+      }
+
+      fetchUser();
+      fetchUserInfo();
+      allUserLocation();
+    }, [])
 
 
 
@@ -135,7 +149,7 @@ export default function Index() {
       </Animated.View>
 
       <Animated.View style={[{ flex: 1 }, mapStyle]}>
-        <Map />
+        <Map userLocation={userLocation} setUserLocation={setUserLocation} user={user} />
       </Animated.View>
 
       <Animated.View style={widgetStyle}>
@@ -146,7 +160,7 @@ export default function Index() {
         />
       </Animated.View>
 
-      <SceneManager scene="appTour" user={user}/>
+      <SceneManager scene="appTour" user={user} />
 
       <Animated.View style={bottomBarStyle}>
         <BottomBar />
