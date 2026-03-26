@@ -131,3 +131,19 @@ class Arena(db.Model):
             "longitude": self.longitude,
             "area_radius": self.area_radius
         }
+        
+class Flags(db.Model):
+    __tablename__ = "flags"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    mascot_status = db.Column(db.String(100), default=False)
+    
+    user = db.relationship("User", backref="flags")
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "mascot_status": self.mascot_status
+        }
+    

@@ -3,14 +3,17 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   Image,
   TouchableOpacity,
+  ScrollView,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from 'expo-router'
-import BottomBar from '@/components/bottomBar'
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from 'expo-router';
+import BottomBar from '@/components/bottomBar';
 
+const { width } = Dimensions.get('window');
 
 const leaderboardData = [
   { id: 1, name: "Rohan", level: 15, steps: 12450, territories: 8, avatar: "https://i.pravatar.cc/150?img=1" },
@@ -41,164 +44,228 @@ export default function Leaderboard() {
     currentPage * USERS_PER_PAGE
   );
 
-  const renderItem = ({ item, index }) => (
-    <View style={styles.tableRow}>
-      <Text style={[styles.cell, { flex: 0.7 }]}>
-        {index + 4}
-      </Text>
+  const getMedalGradient = (rank) => {
+    switch (rank) {
+      case 0:
+        return { colors: ['#FFD700', '#FDB931'], shadow: '#FFD70040' };
+      case 1:
+        return { colors: ['#C0C0C0', '#A8A8A8'], shadow: '#C0C0C040' };
+      case 2:
+        return { colors: ['#CD7F32', '#B87333'], shadow: '#CD7F3240' };
+      default:
+        return { colors: ['#3b82f6', '#2563eb'], shadow: '#3b82f640' };
+    }
+  };
 
-      <View style={[styles.nameCell, { flex: 2 }]}>
-        <Image source={{ uri: item.avatar }} style={styles.tableAvatar} />
-        <Text style={styles.cell}>{item.name}</Text>
-      </View>
+  const formatSteps = (steps) => {
+    if (steps >= 10000) {
+      return `${(steps / 1000).toFixed(1)}k`;
+    }
+    return steps.toString();
+  };
 
-      <Text style={[styles.cell, { flex: 1.5, textAlign: "right" }]}>
-        {item.steps.toLocaleString()}
-      </Text>
-
-      <Text style={[styles.cell, { flex: 1.2, textAlign: "right" }]}>
-        {item.territories}
-      </Text>
-    </View>
-  );
-
-  const renderTopUser = (user, index) => {
-    const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉";
-
-    const isFirst = index === 0;
-
-    const borderColor =
-      index === 0
-        ? "#FFD700"
-        : index === 1
-          ? "#C0C0C0"
-          : "#CD7F32";
+  const TopThreeCard = ({ user, rank }) => {
+    const medalGradient = getMedalGradient(rank);
+    const medalIcon = rank === 0 ? "🥇" : rank === 1 ? "🥈" : "🥉";
+    const rankText = rank === 0 ? "1st" : rank === 1 ? "2nd" : "3rd";
 
     return (
-      <View
-        style={[
-          styles.topUserContainer,
-          isFirst && { marginTop: -20 },
-        ]}
-      >
-        <View style={styles.heroAvatarContainer}>
-          <Image
-            source={{ uri: user.avatar }}
-            style={[
-              styles.heroAvatar,
-              {
-                borderColor: borderColor,
-                width: isFirst ? 110 : 85,
-                height: isFirst ? 110 : 85,
-              },
-            ]}
-          />
+      <View style={[
+        styles.topThreeCardWrapper,
+        rank === 0 && styles.firstPlaceWrapper,
+      ]}>
+        <LinearGradient
+          colors={medalGradient.colors}
+          style={styles.topThreeCard}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          {/* Medal Icon - Smaller */}
+          <View style={styles.medalIconContainer}>
+            <Text style={styles.medalIconText}>{medalIcon}</Text>
+          </View>
 
-          <View style={styles.heroMedal}>
-            <Text style={styles.heroMedalText}>{medal}</Text>
+          {/* Rank Number */}
+          {/* <View style={styles.rankNumberContainer}>
+            <Text style={styles.rankNumberText}>{rankText}</Text>
+          </View> */}
+
+          {/* Avatar */}
+          <View style={[
+            styles.avatarContainer,
+            rank === 0 && styles.firstAvatarContainer,
+          ]}>
+            <Image source={{ uri: user.avatar }} style={[
+              styles.avatar,
+              rank === 0 && styles.firstAvatar
+            ]} />
+          </View>
+
+          {/* User Info */}
+          <Text style={styles.userName} numberOfLines={1}>{user.name}</Text>
+
+          {/* Stats - Improved layout */}
+          <View style={styles.statsWrapper}>
+            <View style={styles.statItem}>
+              <Ionicons name="footsteps-outline" size={12} color="#fff" />
+              <Text style={styles.statValue} numberOfLines={1}>
+                {formatSteps(user.steps)}
+              </Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Ionicons name="map-outline" size={12} color="#fff" />
+              <Text style={styles.statValue} numberOfLines={1}>
+                {user.territories}
+              </Text>
+            </View>
+          </View>
+
+          {/* Level Badge */}
+          <View style={styles.levelBadge}>
+            <Ionicons name="flash" size={10} color="white" />
+            <Text style={styles.levelText}>Lvl {user.level}</Text>
+          </View>
+        </LinearGradient>
+      </View>
+    );
+  };
+
+  const TableRow = ({ item, index }) => {
+    const globalRank = index + 4;
+
+    return (
+      <LinearGradient
+        colors={['#1e293b', '#0f172a']}
+        style={styles.tableRow}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      >
+        <View style={styles.tableRankContainer}>
+          <Text style={styles.tableRank}>#{globalRank}</Text>
+        </View>
+
+        <View style={styles.tableUserInfo}>
+          <Image source={{ uri: item.avatar }} style={styles.tableAvatar} />
+          <View style={styles.tableUserText}>
+            <Text style={styles.tableName} numberOfLines={1}>{item.name}</Text>
+            <Text style={styles.tableLevel}>Lvl {item.level}</Text>
           </View>
         </View>
 
-        <Text style={styles.heroName}>{user.name}</Text>
-        <Text style={styles.heroStat}>
-          {user.steps.toLocaleString()}
-        </Text>
-
-        <Text style={styles.heroSubStat}>
-          {user.territories} Territories
-        </Text>
-      </View>
+        <View style={styles.tableStats}>
+          <View style={styles.tableStatItem}>
+            <Ionicons name="footsteps-outline" size={12} color="#94a3b8" />
+            <Text style={styles.tableStatValue}>{formatSteps(item.steps)}</Text>
+          </View>
+          <View style={styles.tableStatItem}>
+            <Ionicons name="map-outline" size={12} color="#94a3b8" />
+            <Text style={styles.tableStatValue}>{item.territories}</Text>
+          </View>
+        </View>
+      </LinearGradient>
     );
   };
 
   return (
     <View style={styles.container}>
-        <Text style={styles.title}>Leaderboard</Text>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Leaderboard</Text>
+          <Text style={styles.headerSubtitle}>Top performers this week</Text>
+        </View>
 
-      <View style={styles.toggleContainer}>
-        {["today", "weekly", "monthly"].map((item) => (
-          <TouchableOpacity
-            key={item}
-            style={[
-              styles.toggleButton,
-              filter === item && styles.activeToggle,
-            ]}
-            onPress={() => setFilter(item)}
-          >
-            <Text
+        {/* Filter Tabs */}
+        <View style={styles.filterContainer}>
+          {["today", "weekly", "monthly"].map((item) => (
+            <TouchableOpacity
+              key={item}
               style={[
-                styles.toggleText,
-                filter === item && styles.activeToggleText,
+                styles.filterButton,
+                filter === item && styles.activeFilter,
               ]}
+              onPress={() => setFilter(item)}
             >
-              {item.charAt(0).toUpperCase() + item.slice(1)}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+              <Text
+                style={[
+                  styles.filterText,
+                  filter === item && styles.activeFilterText,
+                ]}
+              >
+                {item.charAt(0).toUpperCase() + item.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      {/* HERO TOP 3 */}
-      <View style={styles.heroSection}>
-        {renderTopUser(topThree[1], 1)}
-        {renderTopUser(topThree[0], 0)}
-        {renderTopUser(topThree[2], 2)}
-      </View>
+        {/* Top 3 Section */}
+        <View style={styles.topThreeSection}>
+          {/* Second Place (Left) */}
+          <View style={styles.topThreeItem}>
+            <TopThreeCard user={topThree[1]} rank={1} />
+          </View>
 
-      {/* TABLE HEADER */}
-      <View style={styles.tableHeader}>
-        <Text style={[styles.headerCell, { flex: 0.7 }]}>#</Text>
-        <Text style={[styles.headerCell, { flex: 2 }]}>Name</Text>
-        <Text style={[styles.headerCell, { flex: 1.5, textAlign: "right" }]}>
-          Steps
-        </Text>
-        <Text style={[styles.headerCell, { flex: 1.2, textAlign: "right" }]}>
-          Terr.
-        </Text>
-      </View>
+          {/* First Place (Center) */}
+          <View style={[styles.topThreeItem, styles.firstPlaceItem]}>
+            <TopThreeCard user={topThree[0]} rank={0} />
+          </View>
 
-      {/* TABLE AREA */}
-      <View style={styles.tableWrapper}>
-        <View style={styles.tableContainer}>
-          {paginatedData.map((item, index) =>
-            renderItem({ item, index })
+          {/* Third Place (Right) */}
+          <View style={styles.topThreeItem}>
+            <TopThreeCard user={topThree[2]} rank={2} />
+          </View>
+        </View>
+
+        {/* Rest of Leaderboard */}
+        <View style={styles.tableSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>All Players</Text>
+            <Text style={styles.sectionCount}>{sortedData.length} total</Text>
+          </View>
+
+          <View style={styles.tableContainer}>
+            {paginatedData.map((item, index) => (
+              <TableRow key={item.id} item={item} index={index} />
+            ))}
+          </View>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <View style={styles.paginationContainer}>
+              <TouchableOpacity
+                onPress={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                style={[styles.pageButton, currentPage === 1 && styles.pageButtonDisabled]}
+              >
+                <Ionicons name="chevron-back" size={20} color={currentPage === 1 ? "#475569" : "#3b82f6"} />
+                <Text style={[styles.pageButtonText, currentPage === 1 && styles.pageButtonDisabledText]}>Previous</Text>
+              </TouchableOpacity>
+
+              <View style={styles.pageInfo}>
+                <Text style={styles.pageInfoText}>
+                  Page {currentPage} of {totalPages}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                style={[styles.pageButton, currentPage === totalPages && styles.pageButtonDisabled]}
+              >
+                <Text style={[styles.pageButtonText, currentPage === totalPages && styles.pageButtonDisabledText]}>Next</Text>
+                <Ionicons name="chevron-forward" size={20} color={currentPage === totalPages ? "#475569" : "#3b82f6"} />
+              </TouchableOpacity>
+            </View>
           )}
         </View>
 
-        {/* PAGINATION */}
-        <View style={styles.paginationContainer}>
-          <TouchableOpacity
-            disabled={currentPage === 1}
-            onPress={() => setCurrentPage(currentPage - 1)}
-          >
-            <Text
-              style={[
-                styles.pageButton,
-                currentPage === 1 && { opacity: 0.3 },
-              ]}
-            >
-              ◀ Prev
-            </Text>
-          </TouchableOpacity>
-
-          <Text style={styles.pageInfo}>
-            Page {currentPage} / {totalPages}
-          </Text>
-
-          <TouchableOpacity
-            disabled={currentPage === totalPages}
-            onPress={() => setCurrentPage(currentPage + 1)}
-          >
-            <Text
-              style={[
-                styles.pageButton,
-                currentPage === totalPages && { opacity: 0.3 },
-              ]}
-            >
-              Next ▶
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+        <View style={styles.bottomPadding} />
+      </ScrollView>
 
       <BottomBar />
     </View>
@@ -208,191 +275,321 @@ export default function Leaderboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0F172A",
-    padding: 20,
-    paddingTop: 55,
+    backgroundColor: '#0a0f1a',
   },
-
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
   header: {
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 24,
+    backgroundColor: '#0a0f1a',
+  },
+  headerTitle: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 2,
+    letterSpacing: -0.5,
+  },
+  headerSubtitle: {
+    fontSize: 15,
+    color: '#64748b',
+    letterSpacing: -0.3,
+  },
+  filterContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 30,
-  },
-
-  backButton: {
-    marginRight: 15,
-    padding: 5,
-  },
-
-  title: {
-    color: "white",
-    fontSize: 26,
-    marginBottom: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-
-  toggleContainer: {
-    flexDirection: "row",
-    backgroundColor: "#1E293B",
+    marginHorizontal: 20,
+    marginBottom: 24,
+    backgroundColor: "#1e293b",
     borderRadius: 12,
     padding: 4,
-    marginBottom: 25,
+    gap: 4,
   },
-
-  toggleButton: {
+  filterButton: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 10,
     alignItems: "center",
   },
-
-  activeToggle: {
-    backgroundColor: "cyan",
+  activeFilter: {
+    borderWidth: 1,
+    borderColor: "cyan",
   },
-
-  toggleText: {
-    color: "#94A3B8",
+  filterText: {
+    color: "#94a3b8",
     fontWeight: "600",
+    fontSize: 14,
   },
-
-  activeToggleText: {
-    color: "#0F172A",
-    fontWeight: "bold",
+  activeFilterText: {
+    color: "white",
   },
-
-  /* HERO SECTION */
-
-  heroSection: {
-    marginTop: 20,
+  topThreeSection: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "flex-end",
-    marginBottom: 30,
+    marginBottom: 32,
+    paddingHorizontal: 8,
+    gap: 4,
   },
-
-  topUserContainer: {
-    alignItems: "center",
+  topThreeItem: {
     flex: 1,
+    alignItems: "center",
   },
-
-  heroAvatarContainer: {
+  firstPlaceItem: {
+    transform: [{ scale: 1.02 }],
+    zIndex: 10,
+  },
+  topThreeCardWrapper: {
+    width: '100%',
+    alignItems: "center",
+  },
+  firstPlaceWrapper: {
+    marginTop: -8,
+  },
+  topThreeCard: {
+    width: '100%',
+    alignItems: "center",
+    borderRadius: 20,
+    padding: 16,
+    paddingTop: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  medalIconContainer: {
+    position: "absolute",
+    top: -10,
+    left: -10,
+    backgroundColor: "#0a0f1a",
+    borderRadius: 25,
+    padding: 6,
+    zIndex: 10,
+  },
+  medalIconText: {
+    fontSize: 20,
+  },
+  rankNumberContainer: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: "#0a0f1a",
+    borderRadius: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  rankNumberText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  avatarContainer: {
+    marginBottom: 12,
     position: "relative",
   },
-
-  heroAvatar: {
-    width: 85,
-    height: 85,
-    borderRadius: 50,
+  firstAvatarContainer: {
+    marginBottom: 12,
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  firstAvatar: {
+    width: 75,
+    height: 75,
+    borderRadius: 37.5,
     borderWidth: 3,
+  },
+  crownBadge: {
+    position: "absolute",
+    bottom: -3,
+    right: -3,
+    backgroundColor: "#0a0f1a",
+    borderRadius: 15,
+    padding: 3,
+    borderWidth: 1,
     borderColor: "#FFD700",
   },
-
-  heroMedal: {
-    position: "absolute",
-    bottom: -5,
-    right: -5,
-    backgroundColor: "#1E293B",
-    borderRadius: 15,
-    padding: 4,
-  },
-
-  heroMedalText: {
-    fontSize: 18,
-  },
-
-  heroName: {
+  userName: {
     color: "#fff",
-    fontWeight: "bold",
-    marginTop: 8,
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 8,
+    textAlign: "center",
+    maxWidth: '100%',
   },
-
-  heroStat: {
-    color: "cyan",
-    fontWeight: "bold",
-    marginTop: 4,
+  statsWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 3,
+    marginBottom: 8,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 16,
   },
-
-  heroSubStat: {
-    color: "#94A3B8",
-    fontSize: 12,
+  statItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
   },
-
-  /* TABLE */
-
-  tableContainer: {
-    height: 240,           // Fixed table height
-    backgroundColor: "#1E293B",
-    overflow: "hidden",
+  statValue: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "600",
   },
-
-  paginationContainer: {
+  statDivider: {
+    width: 1,
+    height: 12,
+    backgroundColor: "rgba(255,255,255,0.3)",
+  },
+  levelBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  levelText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "600",
+  },
+  tableSection: {
+    marginHorizontal: 16,
+    marginBottom: 24,
+  },
+  sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 12,
-    paddingHorizontal: 5,
+    alignItems: "baseline",
+    marginBottom: 16,
+    paddingHorizontal: 4,
   },
-
-  tableHeader: {
-    flexDirection: "row",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "cyan",
-    borderTopColor: "cyan",
-    backgroundColor: "#1E293B",
-    padding: 15,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#fff",
   },
-
-  headerCell: {
-    color: "#94A3B8",
-    fontWeight: "bold",
-    fontSize: 12,
+  sectionCount: {
+    fontSize: 13,
+    color: "#64748b",
   },
-
+  tableContainer: {
+    backgroundColor: "#1e293b",
+    borderRadius: 20,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#2d3a4e",
+  },
   tableRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#1E293B",
-    backgroundColor: "#1E293B",
-    padding: 15,
+    borderBottomColor: "#2d3a4e",
   },
-
-  cell: {
-    color: "#FFFFFF",
-    fontSize: 14,
+  tableRankContainer: {
+    width: 45,
   },
-
-  nameCell: {
+  tableRank: {
+    color: "#94a3b8",
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  tableUserInfo: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
   },
-
+  tableUserText: {
+    flex: 1,
+  },
   tableAvatar: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    marginRight: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
-
-  /* PAGINATION */
-
+  tableName: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  tableLevel: {
+    color: "#64748b",
+    fontSize: 11,
+  },
+  tableStats: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  tableStatItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+  },
+  tableStatValue: {
+    color: "#e2e8f0",
+    fontSize: 12,
+    fontWeight: "500",
+  },
   paginationContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 15,
+    marginTop: 20,
+    paddingHorizontal: 8,
   },
-
   pageButton: {
-    color: "cyan",
-    fontWeight: "bold",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "#1e293b",
+    borderRadius: 8,
   },
-
+  pageButtonDisabled: {
+    opacity: 0.5,
+  },
+  pageButtonText: {
+    color: "#3b82f6",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  pageButtonDisabledText: {
+    color: "#475569",
+  },
   pageInfo: {
-    color: "#aaa",
+    backgroundColor: "#1e293b",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  pageInfoText: {
+    color: "#94a3b8",
+    fontSize: 14,
+  },
+  bottomPadding: {
+    height: 20,
   },
 });

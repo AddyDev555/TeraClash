@@ -24,15 +24,19 @@ export default function Index() {
   const [user, setUser] = React.useState([]);
   const [userInfo, setUserInfo] = React.useState([]);
   const [userLocation, setUserLocation] = React.useState([]);
+  const [userFlags, setUserFlags] = React.useState([]);
 
-  useEffect(() => {
+  useEffect(()=>{
     const fetchUser = async () => {
       const user = await AsyncStorage.getItem('user');
       if (user) {
         setUser(JSON.parse(user));
       }
     };
+    fetchUser();
+  },[])
 
+  useEffect(() => {
     const fetchUserInfo = async () => {
       try {
 
@@ -66,12 +70,34 @@ export default function Index() {
         console.log(error);
         return null;
       }
-      }
+    }
 
-      fetchUser();
-      fetchUserInfo();
-      allUserLocation();
-    }, [])
+    const user_flags = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem("user");
+
+        if (!storedUser) {
+          console.log("No user found in storage");
+          return null;
+        }
+
+        const parsedUser = JSON.parse(storedUser);
+        const userId = parsedUser.id;
+        const response = await API.get(`/api/flags/${userId}`);
+        setUserFlags(response.flags);
+        console.log(response.flags);
+      }
+      catch (error) {
+        console.log(error);
+        return null;
+      }
+    }
+
+
+    fetchUserInfo();
+    allUserLocation();
+    user_flags();
+  }, [])
 
 
 
@@ -160,7 +186,7 @@ export default function Index() {
         />
       </Animated.View>
 
-      <SceneManager scene="appTour" user={user} />
+      <SceneManager userFlags={userFlags} user={user} />
 
       <Animated.View style={bottomBarStyle}>
         <BottomBar />
@@ -173,7 +199,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#0a0f1a',
   },
   floatingHead: {
     position: 'absolute',

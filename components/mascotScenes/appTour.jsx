@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import Mascot from "../mascot"
 
-export default function AppTour({ onFinish, user }) {
+export default function AppTour({ onFinish, user }) {    
     const steps = [
     {
         mood: "hi",

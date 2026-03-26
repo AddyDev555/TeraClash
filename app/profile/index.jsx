@@ -20,11 +20,11 @@ const STORAGE_KEY = "user"
 const DEFAULT_AVATAR = "https://i.pinimg.com/1200x/cf/78/fe/cf78fe788b403ff3d41784153b10d20d.jpg"
 
 const ACHIEVEMENTS = [
-    { id: 1, title: "First 1,000 Steps", icon: "walk", unlocked: true },
-    { id: 2, title: "Earn 1,000 Coins", icon: "flame", unlocked: true },
-    { id: 3, title: "Capture 10 Territories", icon: "map", unlocked: true },
-    { id: 4, title: "Reach Level 20", icon: "trophy", unlocked: false },
-    { id: 5, title: "100K Total Steps", icon: "fitness", unlocked: false },
+    { id: 1, title: "First 10,000 Steps", icon: "walk", key: "total_steps", value: 10000 },
+    { id: 2, title: "Earn 1,000 Coins", icon: "flame", key: "sweat_coins", value: 1000 },
+    { id: 3, title: "Capture 20 Territories", icon: "map", key: "areas_captured", value: 20 },
+    { id: 4, title: "Reach Level 20", icon: "trophy", key: "user_level", value: 20 },
+    { id: 5, title: "100K Total Steps", icon: "fitness", key: "total_steps", value: 100000 },
 ]
 
 /* ─────────────────────────────────────────────
@@ -53,6 +53,11 @@ const resolveAvatar = (pp) => {
     return `${API_URL}/api/profile/${clean}`
 }
 
+const isUnlocked = (achievement, userData) => {
+    if (!userData) return false
+    return (userData[achievement.key] || 0) >= achievement.value
+}
+
 const showToast = (type, text1, text2) =>
     Toast.show({ type, text1, ...(text2 && { text2 }) })
 
@@ -69,15 +74,37 @@ const StatCard = ({ title, value, icon }) => (
     </View>
 )
 
-const AchievementCard = ({ item }) => (
-    <View style={[styles.achievementCard, { backgroundColor: item.unlocked ? '#1E293B' : '#0F172A' }]}>
-        <Ionicons name={item.icon} size={32} color={item.unlocked ? 'cyan' : '#475569'} />
-        <Text style={styles.achievementTitle}>{item.title}</Text>
-        <View style={[styles.statusBadge, { backgroundColor: item.unlocked ? 'cyan' : '#334155' }]}>
-            <Text style={styles.statusText}>{item.unlocked ? 'Unlocked' : 'Locked'}</Text>
+const AchievementCard = ({ item }) => {
+    const progress = item.current
+        ? Math.min((item.current / item.value) * 100, 100)
+        : 0
+
+    return (
+        <View style={[
+            styles.achievementCard,
+            { backgroundColor: item.unlocked ? '#1E293B' : '#0F172A' }
+        ]}>
+            <Ionicons name={item.icon} size={32} color={item.unlocked ? 'cyan' : '#475569'} />
+
+            <Text style={styles.achievementTitle}>{item.title}</Text>
+
+            {!item.unlocked && (
+                <Text style={{ color: '#94A3B8', fontSize: 11 }}>
+                    {item.current || 0}/{item.value}
+                </Text>
+            )}
+
+            <View style={[
+                styles.statusBadge,
+                { backgroundColor: item.unlocked ? 'cyan' : '#334155' }
+            ]}>
+                <Text style={styles.statusText}>
+                    {item.unlocked ? 'Unlocked' : 'Locked'}
+                </Text>
+            </View>
         </View>
-    </View>
-)
+    )
+}
 
 const SettingRow = ({ title, icon, value, onValueChange }) => (
     <View style={styles.settingRow}>
@@ -305,7 +332,20 @@ export default function Profile() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Achievements</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 12 }}>
-                        {ACHIEVEMENTS.map(item => <AchievementCard key={item.id} item={item} />)}
+                        {ACHIEVEMENTS.map(item => {
+                            const current = parsedUserInfo?.[item.key] || 0
+
+                            return (
+                                <AchievementCard
+                                    key={item.id}
+                                    item={{
+                                        ...item,
+                                        current,
+                                        unlocked: current >= item.value
+                                    }}
+                                />
+                            )
+                        })}
                     </ScrollView>
                 </View>
 
@@ -313,8 +353,6 @@ export default function Profile() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Settings</Text>
                     <View style={styles.settingsCon}>
-                        <SettingRow title="Location Sharing" icon="location" value={settings.location} onValueChange={() => toggleSetting('location')} />
-                        <SettingRow title="Privacy Mode" icon="lock-closed" value={settings.privacy} onValueChange={() => toggleSetting('privacy')} />
                         <SettingRow title="Dark Mode" icon="moon" value={settings.darkMode} onValueChange={() => toggleSetting('darkMode')} />
                         <SettingRow title="Notifications" icon="notifications" value={settings.notifications} onValueChange={() => toggleSetting('notifications')} />
                     </View>
