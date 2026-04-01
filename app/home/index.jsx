@@ -26,7 +26,7 @@ export default function Index() {
   const [userLocation, setUserLocation] = React.useState([]);
   const [userFlags, setUserFlags] = React.useState([]);
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchUser = async () => {
       const user = await AsyncStorage.getItem('user');
       if (user) {
@@ -34,7 +34,7 @@ export default function Index() {
       }
     };
     fetchUser();
-  },[])
+  }, [])
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -178,19 +178,14 @@ export default function Index() {
         <Map userLocation={userLocation} setUserLocation={setUserLocation} user={user} />
       </Animated.View>
 
-      <Animated.View style={widgetStyle}>
-        <ConqueredAreasWidget
-          areas={areas}
-          userInfo={userInfo}
-          onAreaPress={() => console.log("Area pressed")}
-        />
-      </Animated.View>
+      <ConqueredAreasWidget
+        areas={areas}
+        userInfo={userInfo}
+        onAreaPress={() => console.log("Area pressed")}
+      />
 
       <SceneManager userFlags={userFlags} user={user} />
-
-      <Animated.View style={bottomBarStyle}>
-        <BottomBar />
-      </Animated.View>
+      <BottomBar />
 
     </SafeAreaView>
   )

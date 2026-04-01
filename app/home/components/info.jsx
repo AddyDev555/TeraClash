@@ -14,35 +14,10 @@ import {
 const { height } = Dimensions.get('window');
 
 const StreakBadge = ({ streak, onPress }) => {
-    const scale = useRef(new Animated.Value(1)).current;
-    const pulse = useRef(new Animated.Value(1)).current;
-
-    useEffect(() => {
-        Animated.loop(
-            Animated.sequence([
-                Animated.timing(pulse, {
-                    toValue: 1.15,
-                    duration: 800,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(pulse, {
-                    toValue: 1,
-                    duration: 0,
-                    useNativeDriver: true,
-                }),
-            ])
-        ).start();
-    }, []);
-
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
             <View style={styles.badgeWrapper}>
-                <Animated.View
-                    style={[
-                        styles.streakRing,
-                        { transform: [{ scale: pulse }] },
-                    ]}
-                />
+                <View style={styles.streakRing} />
                 <View style={styles.streakBadge}>
                     <Text style={styles.streakCount}>{streak}</Text>
                     <Text style={styles.streakLabel}>Streak</Text>
@@ -53,35 +28,10 @@ const StreakBadge = ({ streak, onPress }) => {
 };
 
 const SimpleBadge = ({ count, onPress }) => {
-    const scale = useRef(new Animated.Value(1)).current;
-    const ring = useRef(new Animated.Value(1)).current;
-
-    useEffect(() => {
-        Animated.loop(
-            Animated.sequence([
-                Animated.timing(ring, {
-                    toValue: 1.2,
-                    duration: 900,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(ring, {
-                    toValue: 1,
-                    duration: 0,
-                    useNativeDriver: true,
-                }),
-            ])
-        ).start();
-    }, []);
-
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
             <View style={styles.badgeWrapper}>
-                <Animated.View
-                    style={[
-                        styles.ring,
-                        { transform: [{ scale: ring }] },
-                    ]}
-                />
+                <View style={styles.ring} />
                 <View style={styles.badge}>
                     <Text style={styles.badgeCount}>{count}</Text>
                     <Text style={styles.badgeLabel}>Territory</Text>
@@ -189,7 +139,7 @@ const styles = StyleSheet.create({
     },
 
     streakCount: {
-        color: '#f97316',
+        color: 'white',
         fontWeight: 'bold',
         fontSize: 14,
     },
@@ -232,7 +182,7 @@ const styles = StyleSheet.create({
     },
 
     badgeCount: {
-        color: 'cyan',
+        color: 'white',
         fontWeight: 'bold',
         fontSize: 16,
     },

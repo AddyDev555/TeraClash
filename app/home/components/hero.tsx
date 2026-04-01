@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         gap: 10,
         paddingHorizontal: 16,
-        paddingVertical: 8,
+        paddingVertical: 12,
     },
 
     card: {

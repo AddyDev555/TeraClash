@@ -9,7 +9,8 @@ export default function BottomBar() {
     const tabs = [
         { name: 'Home', icon: 'home', route: '/home' },
         { name: 'Analysis', icon: 'bar-chart', route: '/analysis' },
-        { name: 'LeaderBoard', icon: 'trophy', route: '/leaderboard' },
+        { name: 'Store', icon: 'cart', route: '/shop' },
+        { name: 'Leaderboard', icon: 'trophy', route: '/leaderboard' }
     ]
 
     const router = useRouter()
@@ -56,7 +57,7 @@ export default function BottomBar() {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: 15,
+        bottom: 14,
         zIndex: 1000,
         left: 0,
         right: 0,

@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   },
   activeFilter: {
     borderWidth: 1,
-    borderColor: "cyan",
+    borderColor: "#3b82f6",
   },
   filterText: {
     color: "#94a3b8",

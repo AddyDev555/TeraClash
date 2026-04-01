@@ -74,9 +74,9 @@ export default function Navbar({ userInfo }) {
                 </TouchableOpacity>
 
                 {/* Marketplace */}
-                <TouchableOpacity style={styles.marketplace} onPress={() => router.push('/shop')}>
+                {/* <TouchableOpacity style={styles.marketplace} onPress={() => router.push('/shop')}>
                     <Ionicons name="cart-outline" size={18} color="cyan" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 {showInfo && (
                     <View style={styles.popup}>
@@ -88,7 +88,7 @@ export default function Navbar({ userInfo }) {
                 {/* Profile */}
                 <TouchableOpacity
                     style={styles.profile}
-                    onPress={() => router.push({ pathname: '/profile', params: {userInfo: JSON.stringify(userInfo)} })}
+                    onPress={() => router.push({ pathname: '/profile', params: { userInfo: JSON.stringify(userInfo) } })}
                 >
                     {avatarUri ? (
                         <Image source={{ uri: avatarUri }} style={styles.profileImage} />
@@ -105,12 +105,12 @@ export default function Navbar({ userInfo }) {
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: 25,
-        paddingVertical: 15,
+        paddingVertical: 10,
         paddingTop: 25,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#0F172A',
+        backgroundColor: '#1e293b',
     },
 
     logoCon: {
