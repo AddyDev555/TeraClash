@@ -1,7 +1,8 @@
 import { StyleSheet, View, Text, TouchableOpacity, Animated } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useContext } from 'react'
 import { BlurView } from 'expo-blur'
 import { Ionicons } from '@expo/vector-icons'
+import { AppDataContext } from '../app/context/AppDataProvider'
 
 const mascotImages = {
     hi: require('../assets/mascot/hi.png'),
@@ -33,13 +34,15 @@ export default function Mascot({
     const typingRef = useRef(null)
 
     const startBounce = () => {
-        bounceLoop.current = Animated.loop(
-            Animated.sequence([
-                Animated.timing(bounceAnim, { toValue: -10, duration: 300, useNativeDriver: true }),
-                Animated.timing(bounceAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
-            ])
-        )
-        bounceLoop.current.start()
+        if (!disableEntryAnimations) {
+            bounceLoop.current = Animated.loop(
+                Animated.sequence([
+                    Animated.timing(bounceAnim, { toValue: -10, duration: 300, useNativeDriver: true }),
+                    Animated.timing(bounceAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
+                ])
+            )
+            bounceLoop.current.start()
+        }
     }
 
     const stopBounce = () => {
@@ -51,6 +54,8 @@ export default function Mascot({
     }
 
     // Animate highlight in/out when it changes
+    const { disableEntryAnimations } = useContext(AppDataContext)
+
     useEffect(() => {
         if (glowLoop.current) {
             glowLoop.current.stop()
@@ -61,21 +66,30 @@ export default function Mascot({
             highlightOpacity.setValue(0)
             highlightScale.setValue(0.95)
 
-            Animated.parallel([
-                Animated.timing(highlightOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
-                Animated.spring(highlightScale, { toValue: 1, useNativeDriver: true, friction: 6 }),
-            ]).start(() => {
-                // Pulsing glow after appearing
-                glowLoop.current = Animated.loop(
-                    Animated.sequence([
-                        Animated.timing(highlightOpacity, { toValue: 0.5, duration: 700, useNativeDriver: true }),
-                        Animated.timing(highlightOpacity, { toValue: 1, duration: 700, useNativeDriver: true }),
-                    ])
-                )
-                glowLoop.current.start()
-            })
+            if (disableEntryAnimations) {
+                highlightOpacity.setValue(1)
+                highlightScale.setValue(1)
+            } else {
+                Animated.parallel([
+                    Animated.timing(highlightOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+                    Animated.spring(highlightScale, { toValue: 1, useNativeDriver: true, friction: 6 }),
+                ]).start(() => {
+                    // Pulsing glow after appearing
+                    glowLoop.current = Animated.loop(
+                        Animated.sequence([
+                            Animated.timing(highlightOpacity, { toValue: 0.5, duration: 700, useNativeDriver: true }),
+                            Animated.timing(highlightOpacity, { toValue: 1, duration: 700, useNativeDriver: true }),
+                        ])
+                    )
+                    glowLoop.current.start()
+                })
+            }
         } else {
-            Animated.timing(highlightOpacity, { toValue: 0, duration: 200, useNativeDriver: true }).start()
+            if (disableEntryAnimations) {
+                highlightOpacity.setValue(0)
+            } else {
+                Animated.timing(highlightOpacity, { toValue: 0, duration: 200, useNativeDriver: true }).start()
+            }
         }
 
         return () => {
@@ -93,21 +107,28 @@ export default function Mascot({
         setDisplayedText('')
         setIsTyping(true)
 
-        fadeAnim.setValue(0)
-        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start()
+        if (disableEntryAnimations) {
+            fadeAnim.setValue(1)
+            // show full message instantly
+            setDisplayedText(message)
+            setIsTyping(false)
+        } else {
+            fadeAnim.setValue(0)
+            Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start()
 
-        startBounce()
+            startBounce()
 
-        let i = 0
-        typingRef.current = setInterval(() => {
-            i++
-            setDisplayedText(message.slice(0, i))
-            if (i >= message.length) {
-                clearInterval(typingRef.current)
-                setIsTyping(false)
-                stopBounce()
-            }
-        }, 35)
+            let i = 0
+            typingRef.current = setInterval(() => {
+                i++
+                setDisplayedText(message.slice(0, i))
+                if (i >= message.length) {
+                    clearInterval(typingRef.current)
+                    setIsTyping(false)
+                    stopBounce()
+                }
+            }, 35)
+        }
 
         return () => {
             if (typingRef.current) clearInterval(typingRef.current)

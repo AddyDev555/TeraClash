@@ -65,15 +65,15 @@ const ConqueredAreasWidget = ({ areas, onAreaPress, userInfo }) => {
         <>
             {/* Streak Floating Left */}
             <View style={styles.floatingLeft}>
-                <StreakBadge
-                    streak={userInfo.streak}
-                    onPress={() => console.log("Streak pressed")}
-                />
+                    <StreakBadge
+                        streak={userInfo?.streak ?? 0}
+                        onPress={() => console.log("Streak pressed")}
+                    />
             </View>
 
             {/* Floating Badge */}
             <View style={styles.floating}>
-                <SimpleBadge count={userInfo.areas_captured} onPress={open} />
+                <SimpleBadge count={userInfo?.areas_captured ?? 0} onPress={open} />
             </View>
 
             {/* Bottom Sheet */}
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     floating: {
         position: 'absolute',
         bottom: 80,
-        left: 85,
+        left: 80,
     },
 
     badgeWrapper: {

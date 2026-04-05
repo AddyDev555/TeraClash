@@ -4,19 +4,30 @@ import {
     View,
     TouchableOpacity,
     Modal,
-    Image,
+    StatusBar,
     ScrollView,
     Dimensions
 } from 'react-native'
-import React from 'react'
+import React, {useContext} from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import BottomBar from '@/components/bottomBar'
+import BottomBar from '@/components/bottomBar';
+import { AppDataContext } from '../context/AppDataProvider';
+import Navbar from '@/components/navbar';
 
 const { width } = Dimensions.get('window')
 
 export default function index() {
+    const {
+            user,
+            setUser,
+            userInfo,
+            userLocation,
+            setUserLocation,
+            userFlags,
+        } = useContext(AppDataContext);
+    
     const router = useRouter();
 
     const [selectedPowerup, setSelectedPowerup] = React.useState(null);
@@ -77,15 +88,14 @@ export default function index() {
     }
 
     const PowerupCard = ({ powerup }) => (
-        <LinearGradient
-            colors={['#1e293b', '#0f172a']}
+        <View
             style={styles.powerupCard}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
         >
             <View style={styles.cardHeader}>
                 <View style={[styles.iconContainer, { backgroundColor: `${powerup.color}20` }]}>
-                    <Ionicons name={powerup.icon} size={28} color="#fff" />
+                    <Ionicons name={powerup.icon} size={24} color="cyan" />
                 </View>
                 <View style={styles.headerInfo}>
                     <Text style={styles.powerupName}>{powerup.name}</Text>
@@ -106,14 +116,14 @@ export default function index() {
                     style={styles.infoButton}
                     onPress={() => openInfo(powerup)}
                 >
-                    <Ionicons name="information-circle-outline" size={22} color="#94a3b8" />
+                    <Ionicons name="information-circle-outline" size={20} color="#94a3b8" />
                 </TouchableOpacity>
             </View>
 
             <View style={styles.cardFooter}>
                 <View style={styles.priceContainer}>
                     <View style={styles.coinIcon}>
-                        <Ionicons name="flame" size={14} color="#facc15" />
+                        <Ionicons name="flame" size={12} color="#facc15" />
                     </View>
                     <Text style={styles.powerupPrice}>{powerup.price}</Text>
                 </View>
@@ -125,43 +135,30 @@ export default function index() {
                     ]}
                     disabled={powerup.inStock === 0}
                 >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 20, paddingVertical: 8 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 6 }}>
                         <Text style={styles.buyText}>
                             {powerup.inStock === 0 ? 'Sold Out' : 'Purchase'}
                         </Text>
                         {powerup.inStock > 0 && (
-                            <Ionicons name="cart-outline" size={16} color="#fff" />
+                            <Ionicons name="cart-outline" size={14} />
                         )}
                     </View>
                 </TouchableOpacity>
             </View>
-        </LinearGradient>
+        </View>
     )
 
     return (
         <View style={styles.container}>
+            <StatusBar style="light" translucent backgroundColor="transparent" hidden />
+            <View style={styles.floatingHead}>
+            <Navbar userInfo={userInfo} />
+            </View>
+
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                {/* Header */}
-                <View style={styles.header}>
-                    <View style={styles.headerTop}>
-                        <Text style={styles.headerTitle}>Powerups</Text>
-                        <View style={styles.sweatsContainer}>
-                            <View
-                                style={styles.sweatsGradient}
-                            >
-                                <Ionicons name="flame" size={16} color="#facc15" />
-                                <Text style={styles.sweatsText}>1,250</Text>
-                            </View>
-                        </View>
-                    </View>
-                    <Text style={styles.headerSubtitle}>
-                        Boost your gameplay with special powerups
-                    </Text>
-                </View>
-
                 {/* Filter Tabs */}
                 <View style={styles.filterContainer}>
                     {[
@@ -179,12 +176,13 @@ export default function index() {
                         >
                             <Ionicons
                                 name={item.icon}
-                                size={16}
+                                size={14}
                                 color={'#94a3b8'}
+                                style={filter === item.id && { color: 'cyan' }}
                             />
                             <Text style={[
                                 styles.filterText,
-                                { color: '#94a3b8'}
+                                filter === item.id && styles.activeFilterText
                             ]}>
                                 {item.label}
                             </Text>
@@ -202,7 +200,7 @@ export default function index() {
                 {/* Empty State */}
                 {filteredPowerups.length === 0 && (
                     <View style={styles.emptyState}>
-                        <Ionicons name="cube-outline" size={64} color="#334155" />
+                        <Ionicons name="cube-outline" size={56} color="#334155" />
                         <Text style={styles.emptyStateTitle}>No powerups found</Text>
                         <Text style={styles.emptyStateText}>
                             Try changing your filter or check back later
@@ -225,7 +223,7 @@ export default function index() {
                         <View style={styles.modalIconContainer}>
                             <Ionicons
                                 name={selectedPowerup?.icon}
-                                size={48}
+                                size={40}
                                 color="#fff"
                             />
                         </View>
@@ -240,13 +238,13 @@ export default function index() {
 
                         <View style={styles.modalDetails}>
                             <View style={styles.modalDetailItem}>
-                                <Ionicons name="flame" size={16} color="#facc15" />
+                                <Ionicons name="flame" size={14} color="#facc15" />
                                 <Text style={styles.modalDetailText}>
                                     {selectedPowerup?.price}
                                 </Text>
                             </View>
                             <View style={styles.modalDetailItem}>
-                                <Ionicons name="cube-outline" size={16} color="#94a3b8" />
+                                <Ionicons name="cube-outline" size={14} color="#94a3b8" />
                                 <Text style={styles.modalDetailText}>
                                     {selectedPowerup?.inStock > 0 ? `${selectedPowerup?.inStock} available` : 'Out of stock'}
                                 </Text>
@@ -274,61 +272,19 @@ const styles = StyleSheet.create({
         backgroundColor: '#0a0f1a',
     },
     scrollContent: {
+        paddingTop: 70,
         paddingBottom: 30,
-    },
-    header: {
-        paddingHorizontal: 20,
-        paddingTop: 20,
-        paddingBottom: 16,
-        backgroundColor: '#0a0f1a',
-    },
-    headerTop: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-        marginTop: 30,
-    },
-    headerTitle: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: '#fff',
-        letterSpacing: -0.5,
-    },
-    headerSubtitle: {
-        fontSize: 14,
-        color: '#64748b',
-        letterSpacing: -0.3,
-    },
-    sweatsContainer: {
-        borderRadius: 20,
-        overflow: 'hidden',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 4,
-    },
-    sweatsGradient: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-        gap: 6,
-    },
-    sweatsText: {
-        color: '#facc15',
-        fontWeight: 'bold',
-        fontSize: 14,
     },
     filterContainer: {
         flexDirection: "row",
         justifyContent: "center",
         marginHorizontal: 20,
-        marginBottom: 20,
+        marginBottom: 15,
         gap: 12,
         backgroundColor: '#1e293b',
         borderRadius: 12,
         padding: 4,
+        marginTop: 15,
     },
     filterBtn: {
         flex: 1,
@@ -336,28 +292,33 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 6,
-        paddingVertical: 10,
+        paddingVertical: 8,
         borderRadius: 10,
         backgroundColor: 'transparent',
     },
     activeFilter: {
         borderWidth: 1,
-        borderColor: '#3b82f6',
+        borderColor: 'cyan',
     },
     filterText: {
         fontWeight: "600",
-        color: '#94a3b8',
-        fontSize: 13,
+        fontSize: 12,
+        color: '#94a3b8'
+    },
+    activeFilterText: {
+        color: 'cyan',
+        fontWeight: '700',
     },
     powerupsContainer: {
         paddingHorizontal: 16,
-        gap: 16,
+        gap: 14,
     },
     powerupCard: {
-        borderRadius: 20,
-        padding: 16,
+        borderRadius: 18,
+        padding: 14,
         borderWidth: 1,
         borderColor: '#2d3a4e',
+        backgroundColor: '#1e293b',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -367,12 +328,12 @@ const styles = StyleSheet.create({
     cardHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: 10,
     },
     iconContainer: {
-        width: 52,
-        height: 52,
-        borderRadius: 16,
+        width: 48,
+        height: 48,
+        borderRadius: 14,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
@@ -382,73 +343,74 @@ const styles = StyleSheet.create({
     },
     powerupName: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '700',
         marginBottom: 4,
     },
     typeBadge: {
         alignSelf: 'flex-start',
-        paddingHorizontal: 8,
+        paddingHorizontal: 6,
         paddingVertical: 2,
-        borderRadius: 6,
+        borderRadius: 5,
     },
     typeText: {
-        fontSize: 10,
+        fontSize: 9,
         fontWeight: '700',
         letterSpacing: 0.5,
     },
     infoButton: {
-        padding: 6,
+        padding: 5,
     },
     powerupDescription: {
         color: '#94a3b8',
-        fontSize: 13,
-        lineHeight: 18,
-        marginBottom: 16,
+        fontSize: 12,
+        lineHeight: 17,
+        marginBottom: 14,
     },
     cardFooter: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: 12,
+        gap: 10,
     },
     priceContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        gap: 5,
         backgroundColor: 'rgba(0,0,0,0.3)',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 5,
+        borderRadius: 10,
     },
     coinIcon: {
         backgroundColor: 'rgba(250,204,21,0.2)',
-        padding: 4,
-        borderRadius: 8,
+        padding: 3,
+        borderRadius: 7,
     },
     powerupPrice: {
         color: '#facc15',
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: 'bold',
     },
     priceLabel: {
         color: '#64748b',
-        fontSize: 11,
+        fontSize: 10,
     },
     stockContainer: {
         backgroundColor: 'rgba(255,255,255,0.05)',
-        paddingHorizontal: 8,
+        paddingHorizontal: 6,
         paddingVertical: 2,
-        borderRadius: 8,
+        borderRadius: 7,
     },
     stockText: {
         color: '#94a3b8',
-        fontSize: 11,
+        fontSize: 10,
     },
     buyButton: {
-        borderRadius: 12,
+        borderRadius: 10,
         overflow: 'hidden',
+        backgroundColor: 'cyan',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
@@ -460,33 +422,33 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 6,
-        paddingHorizontal: 20,
-        paddingVertical: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 6,
     },
     soldOutButton: {
         opacity: 0.8,
+        backgroundColor: '#475569',
     },
     buyText: {
-        color: '#fff',
         fontWeight: '700',
-        fontSize: 13,
+        fontSize: 12,
     },
     emptyState: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 60,
+        paddingVertical: 50,
         marginHorizontal: 20,
     },
     emptyStateTitle: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '600',
-        marginTop: 16,
-        marginBottom: 8,
+        marginTop: 14,
+        marginBottom: 6,
     },
     emptyStateText: {
         color: '#64748b',
-        fontSize: 14,
+        fontSize: 12,
         textAlign: 'center',
     },
     bottomPadding: {
@@ -500,15 +462,15 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     modalCard: {
-        borderRadius: 24,
-        padding: 24,
+        borderRadius: 22,
+        padding: 20,
         width: '100%',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#2d3a4e',
     },
     modalIconContainer: {
-        marginBottom: 16,
+        marginBottom: 14,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
@@ -524,48 +486,55 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         color: '#fff',
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: '700',
-        marginBottom: 8,
+        marginBottom: 6,
         textAlign: 'center',
     },
     modalDescription: {
         color: '#94a3b8',
         textAlign: 'center',
-        fontSize: 14,
-        lineHeight: 20,
-        marginBottom: 20,
+        fontSize: 13,
+        lineHeight: 19,
+        marginBottom: 18,
     },
     modalDetails: {
         flexDirection: 'row',
-        gap: 16,
-        marginBottom: 24,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
+        gap: 14,
+        marginBottom: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 14,
         backgroundColor: 'rgba(255,255,255,0.05)',
-        borderRadius: 12,
+        borderRadius: 10,
     },
     modalDetailItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        gap: 5,
     },
     modalDetailText: {
         color: '#e2e8f0',
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '500',
     },
     closeBtn: {
         backgroundColor: 'rgba(255,255,255,0.05)',
-        paddingHorizontal: 32,
-        paddingVertical: 12,
-        borderRadius: 12,
-        minWidth: 120,
+        paddingHorizontal: 28,
+        paddingVertical: 10,
+        borderRadius: 10,
+        minWidth: 100,
         alignItems: 'center',
     },
     closeBtnText: {
         color: '#fff',
         fontWeight: '700',
-        fontSize: 14,
+        fontSize: 13,
     },
+    floatingHead: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
 })

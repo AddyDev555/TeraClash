@@ -70,7 +70,7 @@ export default function Navbar({ userInfo }) {
                     setTimeout(() => setShowInfo(false), 5000)
                 }}>
                     <Ionicons name="flame" size={16} color="#facc15" />
-                    <Text style={styles.sweatsText}>{userInfo.sweat_coins}</Text>
+                    <Text style={styles.sweatsText}>{userInfo?.sweat_coins ?? 0}</Text>
                 </TouchableOpacity>
 
                 {/* Marketplace */}

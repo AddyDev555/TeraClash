@@ -16,7 +16,8 @@ export default function BottomBar() {
     const router = useRouter()
 
     const handleTabPress = (route, name) => {
-        router.push(route);
+        // Use replace for tab switches to avoid stacking routes and any residual transitions
+        router.replace(route);
     }
 
 
@@ -63,8 +64,8 @@ const styles = StyleSheet.create({
         right: 0,
         height: 53,
         overflow: 'hidden',
-        borderTopLeftRadius: 25,
-        borderTopRightRadius: 25,
+        // borderTopLeftRadius: 25,
+        // borderTopRightRadius: 25,
     },
     glassEffect: {
         flex: 1,

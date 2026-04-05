@@ -66,20 +66,15 @@ const showToast = (type, text1, text2) =>
    SUB-COMPONENTS
 ───────────────────────────────────────────── */
 const StatCard = ({ title, value, icon }) => (
-    <LinearGradient
-        colors={['#1e293b', '#0f172a']}
-        style={styles.statCard}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-    >
+    <View style={styles.statCard}>
         <View style={styles.statHeader}>
-            <View style={[styles.iconContainer, { backgroundColor: '#3b82f620' }]}>
-                <Ionicons name={icon} size={24} color="#3b82f6" />
+            <View style={[styles.iconContainer, { backgroundColor: '#c2ccd820' }]}>
+                <Ionicons name={icon} size={20} color="cyan" />
             </View>
             <Text style={styles.statValue}>{value}</Text>
         </View>
         <Text style={styles.statTitle}>{title}</Text>
-    </LinearGradient>
+    </View>
 )
 
 const AchievementCard = ({ item }) => {
@@ -88,18 +83,13 @@ const AchievementCard = ({ item }) => {
         : 0
 
     return (
-        <LinearGradient
-            colors={item.unlocked ? ['#1e293b', '#0f172a'] : ['#0f172a', '#0a0f1a']}
-            style={[
-                styles.achievementCard,
-                item.unlocked && styles.unlockedAchievement
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-        >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <View style={[
+            styles.achievementCard,
+            item.unlocked && styles.unlockedAchievement
+        ]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <View style={[styles.achievementIconContainer, { backgroundColor: item.unlocked ? '#10b98120' : '#33415520' }]}>
-                    <Ionicons name={item.icon} size={24} color={item.unlocked ? '#10b981' : '#475569'} />
+                    <Ionicons name={item.icon} size={20} color={item.unlocked ? '#10b981' : '#475569'} />
                 </View>
 
                 <Text style={styles.achievementTitle}>{item.title}</Text>
@@ -124,22 +114,22 @@ const AchievementCard = ({ item }) => {
                     {item.unlocked ? 'Unlocked' : 'Locked'}
                 </Text>
             </View>
-        </LinearGradient>
+        </View>
     )
 }
 
 const SettingRow = ({ title, icon, value, onValueChange }) => (
     <View style={styles.settingRow}>
         <View style={styles.settingLeft}>
-            <View style={styles.settingIconContainer}>
-                <Ionicons name={icon} size={20} color="#3b82f6" />
+            <View style={[styles.settingIconContainer, { backgroundColor: '#c2ccd820' }]}>
+                <Ionicons name={icon} size={18} color="cyan" />
             </View>
             <Text style={styles.settingText}>{title}</Text>
         </View>
         <Switch
             value={value}
             onValueChange={onValueChange}
-            trackColor={{ false: '#334155', true: '#3b82f6' }}
+            trackColor={{ false: '#334155', true: 'cyan' }}
             thumbColor="#f4f3f4"
         />
     </View>
@@ -295,19 +285,14 @@ export default function Profile() {
                 {/* ── HEADER IMAGE ── */}
                 <View style={styles.imageContainer}>
                     <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                        <Ionicons name="arrow-back" size={22} color="white" />
+                        <Ionicons name="arrow-back" size={20} color="white" />
                     </TouchableOpacity>
 
                     <ImageBackground source={{ uri: avatarUri }} style={styles.profileImage} resizeMode="cover">
-                        <LinearGradient
-                            colors={['transparent', 'rgba(0,0,0,0.8)']}
-                            style={styles.gradientOverlay}
-                        >
+                        <View style={styles.gradientOverlay}>
                             <TouchableOpacity style={styles.imageEditIcon} onPress={handlePickImage}>
-                                <View
-                                    style={styles.editIconGradient}
-                                >
-                                    <Ionicons name="camera-outline" size={20} color="white" />
+                                <View style={styles.editIconContainer}>
+                                    <Ionicons name="camera-outline" size={18} color="white" />
                                 </View>
                             </TouchableOpacity>
 
@@ -324,30 +309,28 @@ export default function Profile() {
                                             autoFocus
                                         />
                                         <TouchableOpacity onPress={handleSaveName} style={styles.editActionBtn}>
-                                            <Ionicons name="checkmark" size={22} color="#3b82f6" />
+                                            <Ionicons name="checkmark" size={20} color="cyan" />
                                         </TouchableOpacity>
                                         <TouchableOpacity onPress={() => setIsEditingName(false)} style={styles.editActionBtn}>
-                                            <Ionicons name="close" size={22} color="#94a3b8" />
+                                            <Ionicons name="close" size={20} color="#94a3b8" />
                                         </TouchableOpacity>
                                     </>
                                 ) : (
                                     <>
                                         <Text style={styles.username}>{displayName}</Text>
                                         <TouchableOpacity style={styles.editIconBtn} onPress={() => setIsEditingName(true)}>
-                                            <Ionicons name="pencil" size={18} color="#94a3b8" />
+                                            <Ionicons name="pencil" size={16} color="#94a3b8" />
                                         </TouchableOpacity>
                                     </>
                                 )}
                             </View>
 
                             <View style={styles.levelBadge}>
-                                <View
-                                    style={styles.levelGradient}
-                                >
+                                <View style={styles.levelContainer}>
                                     <Text style={styles.levelText}>Level {parsedUserInfo?.user_level || 1}</Text>
                                 </View>
                             </View>
-                        </LinearGradient>
+                        </View>
                     </ImageBackground>
                 </View>
 
@@ -389,40 +372,26 @@ export default function Profile() {
                 {/* ── SETTINGS ── */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Settings</Text>
-                    <LinearGradient
-                        colors={['#1e293b', '#0f172a']}
-                        style={styles.settingsContainer}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                    >
+                    <View style={styles.settingsContainer}>
                         <SettingRow title="Dark Mode" icon="moon-outline" value={settings.darkMode} onValueChange={() => toggleSetting('darkMode')} />
                         <SettingRow title="Notifications" icon="notifications-outline" value={settings.notifications} onValueChange={() => toggleSetting('notifications')} />
-                    </LinearGradient>
+                    </View>
                 </View>
 
                 {/* ── ACCOUNT ACTIONS ── */}
                 <View style={styles.accountActions}>
                     <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                        <View
-                            style={styles.logoutGradient}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                        >
-                            <Ionicons name="log-out-outline" size={20} color="white" />
+                        <View style={styles.logoutContainer}>
+                            <Ionicons name="log-out-outline" size={18} color="white" />
                             <Text style={styles.logoutText}>Logout</Text>
                         </View>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.deleteButton} onPress={() => setDeleteModalVisible(true)}>
-                        <LinearGradient
-                            colors={['#ef4444', '#dc2626']}
-                            style={styles.deleteGradient}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                        >
-                            <Ionicons name="trash-outline" size={20} color="white" />
+                        <View style={styles.deleteContainer}>
+                            <Ionicons name="trash-outline" size={18} color="white" />
                             <Text style={styles.deleteText}>Delete Account</Text>
-                        </LinearGradient>
+                        </View>
                     </TouchableOpacity>
                 </View>
 
@@ -433,14 +402,9 @@ export default function Profile() {
             {/* ── DELETE MODAL ── */}
             <Modal visible={deleteModalVisible} transparent animationType="fade">
                 <View style={styles.modalOverlay}>
-                    <LinearGradient
-                        colors={['#1e293b', '#0f172a']}
-                        style={styles.modalContainer}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                    >
+                    <View style={styles.modalContainer}>
                         <View style={styles.modalIconContainer}>
-                            <Ionicons name="warning-outline" size={48} color="#ef4444" />
+                            <Ionicons name="warning-outline" size={40} color="#ef4444" />
                         </View>
                         <Text style={styles.modalTitle}>Delete Account?</Text>
                         <Text style={styles.modalText}>This action is permanent and cannot be undone.</Text>
@@ -449,15 +413,12 @@ export default function Profile() {
                                 <Text style={styles.cancelText}>Cancel</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.confirmDeleteButton} onPress={handleDeleteAccount}>
-                                <LinearGradient
-                                    colors={['#ef4444', '#dc2626']}
-                                    style={styles.confirmGradient}
-                                >
+                                <View style={styles.confirmContainer}>
                                     <Text style={styles.confirmDeleteText}>Delete</Text>
-                                </LinearGradient>
+                                </View>
                             </TouchableOpacity>
                         </View>
-                    </LinearGradient>
+                    </View>
                 </View>
             </Modal>
 
@@ -478,20 +439,20 @@ const styles = StyleSheet.create({
     },
     section: {
         paddingHorizontal: 16,
-        marginTop: 24,
+        marginTop: 20,
     },
     sectionTitle: {
         color: '#fff',
-        fontSize: 20,
+        fontSize: 17,
         fontWeight: '700',
-        marginBottom: 16,
+        marginBottom: 14,
         letterSpacing: -0.5,
     },
 
     // Header
     imageContainer: {
         width: '100%',
-        height: 300,
+        height: 280,
         position: 'relative',
     },
     backButton: {
@@ -499,9 +460,9 @@ const styles = StyleSheet.create({
         top: 20,
         left: 15,
         backgroundColor: 'rgba(0,0,0,0.6)',
-        padding: 10,
+        padding: 8,
         zIndex: 10,
-        borderRadius: 30,
+        borderRadius: 25,
         borderWidth: 1,
         borderColor: '#2d3a4e',
     },
@@ -512,7 +473,8 @@ const styles = StyleSheet.create({
     gradientOverlay: {
         flex: 1,
         justifyContent: 'flex-end',
-        padding: 20,
+        padding: 16,
+        backgroundColor: 'rgba(0,0,0,0.4)',
     },
     imageEditIcon: {
         position: 'absolute',
@@ -520,10 +482,10 @@ const styles = StyleSheet.create({
         right: 20,
         zIndex: 10,
     },
-    editIconGradient: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
+    editIconContainer: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
         justifyContent: 'center',
         backgroundColor: '#1e293b',
         alignItems: 'center',
@@ -531,85 +493,86 @@ const styles = StyleSheet.create({
     nameRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: 10,
     },
     nameInput: {
         color: '#fff',
-        fontSize: 28,
+        fontSize: 22,
         fontWeight: 'bold',
         borderBottomWidth: 2,
-        borderBottomColor: '#3b82f6',
-        marginRight: 10,
-        minWidth: 200,
-        paddingVertical: 4,
+        borderBottomColor: 'cyan',
+        marginRight: 8,
+        minWidth: 180,
+        paddingVertical: 3,
     },
     username: {
         color: '#fff',
-        fontSize: 28,
+        fontSize: 22,
         fontWeight: 'bold',
         letterSpacing: -0.5,
     },
     editIconBtn: {
-        marginLeft: 12,
+        marginLeft: 10,
         backgroundColor: 'rgba(255,255,255,0.2)',
-        padding: 8,
-        borderRadius: 20,
+        padding: 6,
+        borderRadius: 18,
     },
     editActionBtn: {
-        marginLeft: 8,
+        marginLeft: 6,
         backgroundColor: 'rgba(255,255,255,0.1)',
-        padding: 6,
-        borderRadius: 20,
+        padding: 5,
+        borderRadius: 18,
     },
     levelBadge: {
         alignSelf: 'flex-start',
     },
-    levelGradient: {
-        paddingHorizontal: 16,
-        paddingVertical: 4,
-        borderRadius: 10,
+    levelContainer: {
+        paddingHorizontal: 14,
+        paddingVertical: 3,
+        borderRadius: 8,
         backgroundColor: '#1e293b',
-        borderWidth: 2,
+        borderWidth: 1.5,
         borderColor: '#2d3a4e',
     },
     levelText: {
         color: '#fff',
         fontWeight: '600',
-        fontSize: 13,
+        fontSize: 11,
     },
 
     // Stats - Now scrollable horizontally
     statsScrollContainer: {
         paddingHorizontal: 4,
-        gap: 12,
+        gap: 10,
         flexDirection: 'row',
     },
     statCard: {
-        borderRadius: 20,
-        padding: 16,
+        backgroundColor: '#1e293b',
+        borderRadius: 16,
+        padding: 12,
         borderWidth: 1,
         borderColor: '#2d3a4e',
     },
     statHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
-        marginBottom: 12,
+        gap: 6,
+        marginBottom: 8,
     },
     iconContainer: {
-        width: 36,
-        height: 36,
-        borderRadius: 12,
+        width: 30,
+        height: 30,
+        borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
     statTitle: {
-        fontSize: 13,
+        fontSize: 11,
         color: '#94a3b8',
         fontWeight: '500',
     },
     statValue: {
-        fontSize: 24,
+        fontSize: 18,
         fontWeight: '700',
         color: '#fff',
         letterSpacing: -0.5,
@@ -617,71 +580,74 @@ const styles = StyleSheet.create({
 
     // Achievements
     achievementsScroll: {
-        paddingVertical: 8,
+        paddingVertical: 6,
         paddingHorizontal: 4,
-        gap: 12,
+        gap: 10,
         flexDirection: 'row',
     },
     achievementCard: {
-        width: 160,
-        borderRadius: 20,
-        padding: 16,
-        marginRight: 12,
+        width: 150,
+        backgroundColor: '#0f172a',
+        borderRadius: 16,
+        padding: 12,
+        marginRight: 10,
         borderWidth: 1,
         borderColor: '#2d3a4e',
     },
     unlockedAchievement: {
         borderColor: '#10b981',
+        backgroundColor: '#1e293b',
     },
     achievementIconContainer: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
+        width: 28,
+        height: 28,
+        borderRadius: 14,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: 10,
     },
     achievementTitle: {
         color: '#fff',
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '600',
-        marginBottom: 8,
+        marginBottom: 6,
     },
     progressContainer: {
-        marginVertical: 8,
+        marginVertical: 6,
     },
     progressBar: {
-        height: 4,
+        height: 3,
         backgroundColor: '#334155',
         borderRadius: 2,
         overflow: 'hidden',
-        marginBottom: 4,
+        marginBottom: 3,
     },
     progressFill: {
         height: '100%',
-        backgroundColor: '#3b82f6',
+        backgroundColor: 'cyan',
         borderRadius: 2,
     },
     progressText: {
         color: '#94a3b8',
-        fontSize: 11,
+        fontSize: 10,
     },
     statusBadge: {
-        marginTop: 8,
-        paddingVertical: 4,
-        borderRadius: 12,
+        marginTop: 6,
+        paddingVertical: 3,
+        borderRadius: 10,
         alignItems: 'center',
     },
     statusText: {
-        fontSize: 11,
+        fontSize: 10,
         fontWeight: '600',
         color: '#fff',
     },
 
     // Settings
     settingsContainer: {
-        borderRadius: 20,
-        padding: 16,
+        backgroundColor: '#1e293b',
+        borderRadius: 16,
+        padding: 14,
         paddingVertical: 2,
         borderWidth: 1,
         borderColor: '#2d3a4e',
@@ -690,67 +656,66 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 14,
+        paddingVertical: 12,
     },
     settingLeft: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: 10,
     },
     settingIconContainer: {
-        width: 32,
-        height: 32,
-        borderRadius: 10,
-        backgroundColor: '#3b82f620',
+        width: 28,
+        height: 28,
+        borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
     },
     settingText: {
         color: '#fff',
-        fontSize: 15,
+        fontSize: 13,
         fontWeight: '500',
     },
 
     // Account actions
     accountActions: {
         paddingHorizontal: 16,
-        marginTop: 24,
+        marginTop: 20,
         marginBottom: 20,
-        gap: 12,
+        gap: 10,
     },
     logoutButton: {
-        borderRadius: 14,
+        borderRadius: 12,
         overflow: 'hidden',
     },
-    logoutGradient: {
+    logoutContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
-        backgroundColor: '#3b82f6',
-        color: "white",
-        paddingVertical: 14,
+        gap: 6,
+        backgroundColor: 'cyan',
+        paddingVertical: 12,
     },
     logoutText: {
         fontWeight: '700',
-        color: 'white',
-        fontSize: 15,
+        color: '#0a0f1a',
+        fontSize: 13,
     },
     deleteButton: {
-        borderRadius: 14,
+        borderRadius: 12,
         overflow: 'hidden',
     },
-    deleteGradient: {
+    deleteContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
-        paddingVertical: 14,
+        gap: 6,
+        backgroundColor: '#ef4444',
+        paddingVertical: 12,
     },
     deleteText: {
         fontWeight: '700',
         color: 'white',
-        fontSize: 15,
+        fontSize: 13,
     },
     bottomPadding: {
         height: 20,
@@ -766,62 +731,71 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         width: '100%',
-        borderRadius: 24,
-        padding: 24,
+        backgroundColor: '#1e293b',
+        borderRadius: 20,
+        padding: 20,
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#2d3a4e',
     },
     modalIconContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 70,
+        height: 70,
+        borderRadius: 35,
         backgroundColor: '#ef444420',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 14,
     },
     modalTitle: {
         color: '#fff',
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: '700',
-        marginBottom: 8,
+        marginBottom: 6,
     },
     modalText: {
         color: '#94a3b8',
         textAlign: 'center',
-        marginBottom: 24,
-        fontSize: 14,
+        marginBottom: 20,
+        fontSize: 12,
     },
     modalButtons: {
         flexDirection: 'row',
-        gap: 12,
+        gap: 10,
         width: '100%',
     },
     cancelButton: {
         flex: 1,
         backgroundColor: '#334155',
-        paddingVertical: 12,
-        borderRadius: 12,
+        paddingVertical: 10,
+        borderRadius: 10,
         alignItems: 'center',
     },
     cancelText: {
         color: '#fff',
         fontWeight: '600',
-        fontSize: 14,
+        fontSize: 12,
     },
     confirmDeleteButton: {
         flex: 1,
-        borderRadius: 12,
+        borderRadius: 10,
         overflow: 'hidden',
     },
-    confirmGradient: {
-        paddingVertical: 12,
+    confirmContainer: {
+        paddingVertical: 10,
         alignItems: 'center',
+        backgroundColor: '#ef4444',
     },
     confirmDeleteText: {
         color: '#fff',
         fontWeight: '600',
-        fontSize: 14,
+        fontSize: 12,
+    },
+    floatingHead: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10,
     },
 })

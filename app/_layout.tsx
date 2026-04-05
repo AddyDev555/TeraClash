@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Image, Text } from 'react-native';
 import Toast from 'react-native-toast-message'
+import AppDataProvider from './context/AppDataProvider'
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -53,15 +54,17 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack initialRouteName={initialRoute}>
+      <AppDataProvider>
+        <Stack initialRouteName={initialRoute}>
         <Stack.Screen name="home" options={{ headerShown: false }} />
         <Stack.Screen name="shop/index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
-        <Stack.Screen name="analysis/index" options={{ headerShown: false }} />
+        <Stack.Screen name="analysis/index" options={{ headerShown: false, animation: 'none' }} />
         <Stack.Screen name="leaderboard/index" options={{ headerShown: false }} />
         <Stack.Screen name="profile/index" options={{ headerShown: false }} />
       </Stack>
+      </AppDataProvider>
       <StatusBar style="auto" />
       <Toast />
     </ThemeProvider>

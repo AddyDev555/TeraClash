@@ -1,12 +1,22 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import React, { useContext } from 'react';
+import { View, Text, StyleSheet, ScrollView, Dimensions, StatusBar } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { AppDataContext } from '../context/AppDataProvider';
+import Navbar from '@/components/navbar';
 import BottomBar from '@/components/bottomBar';
 const { width } = Dimensions.get('window');
 
 export default function AnalysisPage() {
+    const {
+        user,
+        setUser,
+        userInfo,
+        userLocation,
+        setUserLocation,
+        userFlags,
+    } = useContext(AppDataContext);
+
     const weeklySteps = [4000, 6500, 8000, 5000, 9000, 12000, 7000];
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -19,8 +29,8 @@ export default function AnalysisPage() {
     const barData = weeklySteps.map((value, index) => ({
         value,
         label: days[index],
-        frontColor: value === maxSteps ? '#10b981' : '#3b82f6',
-        gradientColor: value === maxSteps ? '#059669' : '#2563eb',
+        frontColor: value === maxSteps ? '#10b981' : 'cyan',
+        gradientColor: value === maxSteps ? '#059669' : '#a8b6c4',
         spacing: 4,
         labelWidth: 30,
     }));
@@ -34,21 +44,16 @@ export default function AnalysisPage() {
     ];
 
     const StatCard = ({ title, value, subtitle, icon, color }) => (
-        <LinearGradient
-            colors={[color + '20', color + '05']}
-            style={styles.statCard}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-        >
+        <View style={styles.statCard}>
             <View style={styles.statHeader}>
                 <View style={[styles.iconContainer, { backgroundColor: color + '20' }]}>
-                    <Ionicons name={icon} size={24} color={color} />
+                    <Ionicons name={icon} size={22} color={color} />
                 </View>
                 <Text style={styles.statTitle}>{title}</Text>
             </View>
             <Text style={styles.statValue}>{value}</Text>
             {subtitle && <Text style={styles.statSubtitle}>{subtitle}</Text>}
-        </LinearGradient>
+        </View>
     );
 
     const HistoryItem = ({ item, index }) => (
@@ -60,11 +65,11 @@ export default function AnalysisPage() {
             </View>
             <View style={styles.historyStats}>
                 <View style={styles.historyStat}>
-                    <Ionicons name="footsteps-outline" size={16} color="#94a3b8" />
+                    <Ionicons name="footsteps-outline" size={15} color="#94a3b8" />
                     <Text style={styles.historyStatValue}>{item.steps.toLocaleString()}</Text>
                 </View>
                 <View style={styles.historyStat}>
-                    <Ionicons name="map-outline" size={16} color="#94a3b8" />
+                    <Ionicons name="map-outline" size={15} color="#94a3b8" />
                     <Text style={styles.historyStatValue}>{item.area}</Text>
                 </View>
                 <View style={[
@@ -73,7 +78,7 @@ export default function AnalysisPage() {
                 ]}>
                     <Ionicons
                         name={item.trend === 'up' ? 'trending-up' : 'trending-down'}
-                        size={14}
+                        size={13}
                         color={item.trend === 'up' ? '#10b981' : '#ef4444'}
                     />
                     <Text style={[
@@ -89,38 +94,36 @@ export default function AnalysisPage() {
 
     return (
         <View style={styles.container}>
+            <StatusBar style="light" translucent backgroundColor="transparent" hidden />
+
             {/* Scrollable Content */}
+            <Navbar userInfo={userInfo} />
+
             <ScrollView
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContentContainer}
             >
-                {/* Header */}
-                <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Analytics</Text>
-                    <Text style={styles.headerSubtitle}>Top performers this week</Text>
-                </View>
-
                 {/* Stats Grid */}
                 <View style={styles.statsGrid}>
                     <StatCard
                         title="Total Steps"
                         value={totalSteps.toLocaleString()}
                         icon="footsteps-outline"
-                        color="#3b82f6"
+                        color="cyan"
                     />
                     <StatCard
                         title="Daily Average"
                         value={avgSteps.toLocaleString()}
                         icon="bar-chart-outline"
-                        color="#8b5cf6"
+                        color="cyan"
                     />
                     <StatCard
                         title="Best Day"
                         value={bestDay}
                         subtitle={`${maxSteps.toLocaleString()} steps`}
                         icon="trophy-outline"
-                        color="#f59e0b"
+                        color="cyan"
                     />
                 </View>
 
@@ -132,21 +135,19 @@ export default function AnalysisPage() {
                     </View>
                     <BarChart
                         data={barData}
-                        barWidth={32}
-                        spacing={12}
+                        barWidth={30}
+                        spacing={11}
                         roundedTop
-                        roundedBottom={8}
+                        roundedBottom={7}
                         hideRules
                         xAxisThickness={0}
                         yAxisThickness={0}
-                        yAxisTextStyle={{ color: '#94a3b8', fontSize: 12 }}
-                        xAxisLabelTextStyle={{ color: '#94a3b8', fontSize: 12, fontWeight: '500' }}
-                        frontColor="#3b82f6"
-                        showGradient
-                        gradientColor="#2563eb"
+                        yAxisTextStyle={{ color: '#94a3b8', fontSize: 11 }}
+                        xAxisLabelTextStyle={{ color: '#94a3b8', fontSize: 11, fontWeight: '500' }}
+                        frontColor="cyan"
                         showValuesAsTopLabel
-                        topLabelTextStyle={{ color: '#fff', fontSize: 11, fontWeight: '600' }}
-                        height={220}
+                        topLabelTextStyle={{ color: '#fff', fontSize: 10, fontWeight: '600' }}
+                        height={210}
                         yAxisLabelPrefix=""
                         yAxisLabelSuffix=""
                         stepValue={3000}
@@ -169,9 +170,6 @@ export default function AnalysisPage() {
                         ))}
                     </View>
                 </View>
-
-                {/* Add extra bottom padding to ensure content doesn't get hidden behind BottomBar */}
-                <View style={styles.bottomPadding} />
             </ScrollView>
 
             {/* Bottom Bar - Fixed at bottom */}
@@ -183,85 +181,66 @@ export default function AnalysisPage() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        width: '100%',
+        height: '100%',
         backgroundColor: '#0a0f1a',
     },
     scrollView: {
         flex: 1,
     },
-    scrollContentContainer: {
-        paddingBottom: 0, // This will be overridden by bottomPadding
-    },
-    header: {
-        paddingHorizontal: 20,
-        paddingTop: 50,
-        paddingBottom: 24,
-        backgroundColor: '#0a0f1a',
-    },
-    headerTitle: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: '#fff',
-        marginBottom: 2,
-        letterSpacing: -0.5,
-    },
-    headerSubtitle: {
-        fontSize: 15,
-        color: '#64748b',
-        letterSpacing: -0.3,
-    },
     statsGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         paddingHorizontal: 16,
-        gap: 12,
-        marginBottom: 24,
-        marginTop: 16, // Added top margin for spacing
+        gap: 11,
+        marginBottom: 22,
+        marginTop: 15,
     },
     statCard: {
         flex: 1,
         minWidth: (width - 44) / 3,
         backgroundColor: '#1e293b',
-        borderRadius: 20,
-        padding: 16,
+        borderRadius: 18,
+        padding: 14,
         borderWidth: 1,
         borderColor: '#2d3a4e',
     },
     statHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
-        marginBottom: 12,
+        gap: 7,
+        marginBottom: 10,
     },
     iconContainer: {
-        width: 36,
-        height: 36,
-        borderRadius: 12,
+        width: 32,
+        height: 32,
+        borderRadius: 11,
         justifyContent: 'center',
         alignItems: 'center',
     },
     statTitle: {
-        fontSize: 13,
+        fontSize: 12,
         color: '#94a3b8',
         fontWeight: '500',
         letterSpacing: -0.2,
     },
     statValue: {
-        fontSize: 24,
+        fontSize: 21,
         fontWeight: '700',
         color: '#fff',
-        marginBottom: 4,
-        letterSpacing: -0.5,
+        marginBottom: 3,
+        letterSpacing: -0.4,
     },
     statSubtitle: {
-        fontSize: 12,
+        fontSize: 11,
         color: '#64748b',
     },
     chartContainer: {
         backgroundColor: '#1e293b',
         marginHorizontal: 16,
-        marginBottom: 24,
-        borderRadius: 24,
-        padding: 20,
+        marginBottom: 22,
+        borderRadius: 22,
+        padding: 18,
         borderWidth: 1,
         borderColor: '#2d3a4e',
     },
@@ -269,29 +248,29 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
-        marginBottom: 20,
+        marginBottom: 18,
     },
     sectionTitle: {
-        fontSize: 18,
+        fontSize: 17,
         fontWeight: '600',
         color: '#fff',
         letterSpacing: -0.3,
     },
     sectionSubtitle: {
-        fontSize: 13,
+        fontSize: 12,
         color: '#64748b',
     },
     historyContainer: {
         marginHorizontal: 16,
     },
     historyList: {
-        gap: 12,
+        gap: 11,
         marginBottom: 16,
     },
     historyItem: {
         backgroundColor: '#1e293b',
-        borderRadius: 16,
-        padding: 16,
+        borderRadius: 15,
+        padding: 14,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -302,39 +281,47 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     historyDate: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: '600',
         color: '#fff',
-        marginBottom: 4,
+        marginBottom: 3,
     },
     historyStats: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 16,
+        gap: 14,
     },
     historyStat: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        gap: 5,
     },
     historyStatValue: {
-        fontSize: 14,
+        fontSize: 13,
         color: '#e2e8f0',
         fontWeight: '500',
     },
     trendBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 20,
+        gap: 3,
+        paddingHorizontal: 7,
+        paddingVertical: 3,
+        borderRadius: 18,
     },
     trendText: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '600',
     },
     bottomPadding: {
-        height: 80, // Adjust this value based on your BottomBar height
+        height: 80,
     },
+    floatingHead: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    paddingTop: 10,
+  },
 });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   View,
   Text,
@@ -6,12 +6,15 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  StatusBar,
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from 'expo-router';
 import BottomBar from '@/components/bottomBar';
+import { AppDataContext } from '../context/AppDataProvider';
+import Navbar from '@/components/navbar';
 
 const { width } = Dimensions.get('window');
 
@@ -25,6 +28,16 @@ const leaderboardData = [
 ];
 
 export default function Leaderboard() {
+  const {
+    user,
+    setUser,
+    userInfo,
+    userLocation,
+    setUserLocation,
+    userFlags,
+  } = useContext(AppDataContext);
+
+
   const USERS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = React.useState(1);
   const router = useRouter();
@@ -53,7 +66,7 @@ export default function Leaderboard() {
       case 2:
         return { colors: ['#CD7F32', '#B87333'], shadow: '#CD7F3240' };
       default:
-        return { colors: ['#3b82f6', '#2563eb'], shadow: '#3b82f640' };
+        return { colors: ['cyan', '#a8b6c4'], shadow: 'cyan40' };
     }
   };
 
@@ -85,11 +98,6 @@ export default function Leaderboard() {
             <Text style={styles.medalIconText}>{medalIcon}</Text>
           </View>
 
-          {/* Rank Number */}
-          {/* <View style={styles.rankNumberContainer}>
-            <Text style={styles.rankNumberText}>{rankText}</Text>
-          </View> */}
-
           {/* Avatar */}
           <View style={[
             styles.avatarContainer,
@@ -107,14 +115,14 @@ export default function Leaderboard() {
           {/* Stats - Improved layout */}
           <View style={styles.statsWrapper}>
             <View style={styles.statItem}>
-              <Ionicons name="footsteps-outline" size={12} color="#fff" />
+              <Ionicons name="footsteps-outline" size={10} color="#fff" />
               <Text style={styles.statValue} numberOfLines={1}>
                 {formatSteps(user.steps)}
               </Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Ionicons name="map-outline" size={12} color="#fff" />
+              <Ionicons name="map-outline" size={10} color="#fff" />
               <Text style={styles.statValue} numberOfLines={1}>
                 {user.territories}
               </Text>
@@ -123,7 +131,7 @@ export default function Leaderboard() {
 
           {/* Level Badge */}
           <View style={styles.levelBadge}>
-            <Ionicons name="flash" size={10} color="white" />
+            <Ionicons name="flash" size={9} color="white" />
             <Text style={styles.levelText}>Lvl {user.level}</Text>
           </View>
         </LinearGradient>
@@ -135,12 +143,7 @@ export default function Leaderboard() {
     const globalRank = index + 4;
 
     return (
-      <LinearGradient
-        colors={['#1e293b', '#0f172a']}
-        style={styles.tableRow}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      >
+      <View style={styles.tableRow}>
         <View style={styles.tableRankContainer}>
           <Text style={styles.tableRank}>#{globalRank}</Text>
         </View>
@@ -155,31 +158,30 @@ export default function Leaderboard() {
 
         <View style={styles.tableStats}>
           <View style={styles.tableStatItem}>
-            <Ionicons name="footsteps-outline" size={12} color="#94a3b8" />
+            <Ionicons name="footsteps-outline" size={11} color="#94a3b8" />
             <Text style={styles.tableStatValue}>{formatSteps(item.steps)}</Text>
           </View>
           <View style={styles.tableStatItem}>
-            <Ionicons name="map-outline" size={12} color="#94a3b8" />
+            <Ionicons name="map-outline" size={11} color="#94a3b8" />
             <Text style={styles.tableStatValue}>{item.territories}</Text>
           </View>
         </View>
-      </LinearGradient>
+      </View>
     );
   };
 
   return (
     <View style={styles.container}>
+      <StatusBar style="light" translucent backgroundColor="transparent" hidden />
+      <View style={styles.floatingHead}>
+        <Navbar userInfo={userInfo} />
+      </View>
+
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Leaderboard</Text>
-          <Text style={styles.headerSubtitle}>Top performers this week</Text>
-        </View>
-
         {/* Filter Tabs */}
         <View style={styles.filterContainer}>
           {["today", "weekly", "monthly"].map((item) => (
@@ -242,7 +244,7 @@ export default function Leaderboard() {
                 disabled={currentPage === 1}
                 style={[styles.pageButton, currentPage === 1 && styles.pageButtonDisabled]}
               >
-                <Ionicons name="chevron-back" size={20} color={currentPage === 1 ? "#475569" : "#3b82f6"} />
+                <Ionicons name="chevron-back" size={18} color={currentPage === 1 ? "#475569" : "cyan"} />
                 <Text style={[styles.pageButtonText, currentPage === 1 && styles.pageButtonDisabledText]}>Previous</Text>
               </TouchableOpacity>
 
@@ -258,7 +260,7 @@ export default function Leaderboard() {
                 style={[styles.pageButton, currentPage === totalPages && styles.pageButtonDisabled]}
               >
                 <Text style={[styles.pageButtonText, currentPage === totalPages && styles.pageButtonDisabledText]}>Next</Text>
-                <Ionicons name="chevron-forward" size={20} color={currentPage === totalPages ? "#475569" : "#3b82f6"} />
+                <Ionicons name="chevron-forward" size={18} color={currentPage === totalPages ? "#475569" : "cyan"} />
               </TouchableOpacity>
             </View>
           )}
@@ -279,32 +281,16 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    paddingTop: 70,
   },
   scrollContent: {
     paddingBottom: 20,
   },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 24,
-    backgroundColor: '#0a0f1a',
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 2,
-    letterSpacing: -0.5,
-  },
-  headerSubtitle: {
-    fontSize: 15,
-    color: '#64748b',
-    letterSpacing: -0.3,
-  },
   filterContainer: {
     flexDirection: "row",
     marginHorizontal: 20,
-    marginBottom: 24,
+    marginBottom: 20,
+    marginTop: 15,
     backgroundColor: "#1e293b",
     borderRadius: 12,
     padding: 4,
@@ -312,27 +298,27 @@ const styles = StyleSheet.create({
   },
   filterButton: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 8,
     borderRadius: 10,
     alignItems: "center",
   },
   activeFilter: {
     borderWidth: 1,
-    borderColor: "#3b82f6",
+    borderColor: "cyan",
   },
   filterText: {
     color: "#94a3b8",
     fontWeight: "600",
-    fontSize: 14,
+    fontSize: 12,
   },
   activeFilterText: {
-    color: "white",
+    color: "cyan",
   },
   topThreeSection: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "flex-end",
-    marginBottom: 32,
+    marginBottom: 28,
     paddingHorizontal: 8,
     gap: 4,
   },
@@ -354,9 +340,9 @@ const styles = StyleSheet.create({
   topThreeCard: {
     width: '100%',
     alignItems: "center",
-    borderRadius: 20,
-    padding: 16,
-    paddingTop: 20,
+    borderRadius: 18,
+    padding: 12,
+    paddingTop: 16,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -368,15 +354,15 @@ const styles = StyleSheet.create({
   },
   medalIconContainer: {
     position: "absolute",
-    top: -10,
-    left: -10,
+    top: -8,
+    left: -8,
     backgroundColor: "#0a0f1a",
-    borderRadius: 25,
-    padding: 6,
+    borderRadius: 20,
+    padding: 5,
     zIndex: 10,
   },
   medalIconText: {
-    fontSize: 20,
+    fontSize: 16,
   },
   rankNumberContainer: {
     position: "absolute",
@@ -395,23 +381,23 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   avatarContainer: {
-    marginBottom: 12,
+    marginBottom: 10,
     position: "relative",
   },
   firstAvatarContainer: {
-    marginBottom: 12,
+    marginBottom: 10,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     borderWidth: 2,
     borderColor: "#fff",
   },
   firstAvatar: {
-    width: 75,
-    height: 75,
-    borderRadius: 37.5,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     borderWidth: 3,
   },
   crownBadge: {
@@ -426,9 +412,9 @@ const styles = StyleSheet.create({
   },
   userName: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "700",
-    marginBottom: 8,
+    marginBottom: 6,
     textAlign: "center",
     maxWidth: '100%',
   },
@@ -437,64 +423,64 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 3,
-    marginBottom: 8,
+    marginBottom: 6,
     backgroundColor: "rgba(0,0,0,0.3)",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 14,
   },
   statItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+    gap: 2,
   },
   statValue: {
     color: "#fff",
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "600",
   },
   statDivider: {
     width: 1,
-    height: 12,
+    height: 10,
     backgroundColor: "rgba(255,255,255,0.3)",
   },
   levelBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+    gap: 2,
     backgroundColor: "rgba(0,0,0,0.3)",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
   },
   levelText: {
     color: "white",
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: "600",
   },
   tableSection: {
     marginHorizontal: 16,
-    marginBottom: 24,
+    marginBottom: 20,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "baseline",
-    marginBottom: 16,
+    marginBottom: 14,
     paddingHorizontal: 4,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
     color: "#fff",
   },
   sectionCount: {
-    fontSize: 13,
+    fontSize: 12,
     color: "#64748b",
   },
   tableContainer: {
     backgroundColor: "#1e293b",
-    borderRadius: 20,
+    borderRadius: 18,
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#2d3a4e",
@@ -502,69 +488,70 @@ const styles = StyleSheet.create({
   tableRow: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 12,
+    padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#2d3a4e",
+    backgroundColor: '#1e293b',
   },
   tableRankContainer: {
-    width: 45,
+    width: 40,
   },
   tableRank: {
     color: "#94a3b8",
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "500",
   },
   tableUserInfo: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 8,
   },
   tableUserText: {
     flex: 1,
   },
   tableAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
   tableName: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
     marginBottom: 2,
   },
   tableLevel: {
     color: "#64748b",
-    fontSize: 11,
+    fontSize: 10,
   },
   tableStats: {
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
   },
   tableStatItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+    gap: 2,
   },
   tableStatValue: {
     color: "#e2e8f0",
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "500",
   },
   paginationContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 18,
     paddingHorizontal: 8,
   },
   pageButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
     backgroundColor: "#1e293b",
     borderRadius: 8,
   },
@@ -572,24 +559,31 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   pageButtonText: {
-    color: "#3b82f6",
+    color: "cyan",
     fontWeight: "600",
-    fontSize: 14,
+    fontSize: 12,
   },
   pageButtonDisabledText: {
     color: "#475569",
   },
   pageInfo: {
     backgroundColor: "#1e293b",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
     borderRadius: 8,
   },
   pageInfoText: {
     color: "#94a3b8",
-    fontSize: 14,
+    fontSize: 12,
   },
   bottomPadding: {
     height: 20,
+  },
+  floatingHead: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
   },
 });
