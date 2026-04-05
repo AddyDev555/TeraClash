@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import BottomBar from '@/components/bottomBar';
 import { AppDataContext } from '../context/AppDataProvider';
 import Navbar from '@/components/navbar';
+import { useTheme } from '@react-navigation/native'
 
 const { width } = Dimensions.get('window');
 
@@ -36,6 +37,8 @@ export default function Leaderboard() {
     setUserLocation,
     userFlags,
   } = useContext(AppDataContext);
+
+  const { colors } = useTheme();
 
 
   const USERS_PER_PAGE = 5;
@@ -171,7 +174,7 @@ export default function Leaderboard() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar style="light" translucent backgroundColor="transparent" hidden />
       <View style={styles.floatingHead}>
         <Navbar userInfo={userInfo} />

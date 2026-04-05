@@ -18,8 +18,10 @@ import Animated, {
   withDelay,
   Easing
 } from 'react-native-reanimated';
+import { useTheme } from '@react-navigation/native'
 
 export default function Index() {
+  const { colors } = useTheme();
   const {
     user,
     setUser,
@@ -110,7 +112,7 @@ export default function Index() {
   }));
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }] }>
       <StatusBar style="light" translucent backgroundColor="transparent" hidden />
 
       <Animated.View style={[styles.floatingHead, headerStyle]}>

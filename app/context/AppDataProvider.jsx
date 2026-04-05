@@ -1,6 +1,8 @@
 import React, { createContext, useEffect, useState, useCallback } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { API } from '@/utils/api'
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
+import { useColorScheme } from '@/hooks/use-color-scheme'
 
 export const AppDataContext = createContext({});
 
@@ -12,6 +14,13 @@ export function AppDataProvider({ children }) {
     const [loading, setLoading] = useState(true);
     // Flag to disable entry/mount animations across the app
     const [disableEntryAnimations] = useState(true);
+
+    // Theme preference: 'system' | 'light' | 'dark'
+    const [themePreference, setThemePreference] = useState('system');
+
+    const systemScheme = useColorScheme();
+
+    const effectiveScheme = themePreference === 'system' ? systemScheme : themePreference;
 
     const fetchAll = useCallback(async () => {
         try {
@@ -48,6 +57,14 @@ export function AppDataProvider({ children }) {
                 console.log('fetch flags error', e);
             }
 
+            // load theme preference
+            try {
+                const t = await AsyncStorage.getItem('theme_pref');
+                if (t) setThemePreference(t);
+            } catch (e) {
+                console.log('load theme pref error', e);
+            }
+
         } catch (e) {
             console.log('app data load error', e);
         } finally {
@@ -58,6 +75,23 @@ export function AppDataProvider({ children }) {
     useEffect(() => {
         fetchAll();
     }, [fetchAll]);
+
+    // Customize themes so card backgrounds match app design
+    const darkTheme = {
+        ...DarkTheme,
+        colors: {
+            ...DarkTheme.colors,
+            card: '#0a0f1a',
+        },
+    }
+
+    const lightTheme = {
+        ...DefaultTheme,
+        colors: {
+            ...DefaultTheme.colors,
+            card: '#f8fafc',
+        },
+    }
 
     return (
         <AppDataContext.Provider
@@ -73,9 +107,20 @@ export function AppDataProvider({ children }) {
                 disableEntryAnimations,
                 loading,
                 refreshAppData: fetchAll,
+                themePreference,
+                setThemePreference: async (pref) => {
+                    try {
+                        await AsyncStorage.setItem('theme_pref', pref);
+                        setThemePreference(pref);
+                    } catch (e) {
+                        console.log('save theme pref error', e);
+                    }
+                },
             }}
         >
-            {children}
+            <ThemeProvider value={effectiveScheme === 'dark' ? darkTheme : lightTheme}>
+                {children}
+            </ThemeProvider>
         </AppDataContext.Provider>
     );
 }

@@ -373,7 +373,6 @@ export default function Profile() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Settings</Text>
                     <View style={styles.settingsContainer}>
-                        <SettingRow title="Dark Mode" icon="moon-outline" value={settings.darkMode} onValueChange={() => toggleSetting('darkMode')} />
                         <SettingRow title="Notifications" icon="notifications-outline" value={settings.notifications} onValueChange={() => toggleSetting('notifications')} />
                     </View>
                 </View>
@@ -382,7 +381,7 @@ export default function Profile() {
                 <View style={styles.accountActions}>
                     <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                         <View style={styles.logoutContainer}>
-                            <Ionicons name="log-out-outline" size={18} color="white" />
+                            <Ionicons name="log-out-outline" size={18} color="#0a0f1a" />
                             <Text style={styles.logoutText}>Logout</Text>
                         </View>
                     </TouchableOpacity>
@@ -790,12 +789,5 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: '600',
         fontSize: 12,
-    },
-    floatingHead: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 10,
     },
 })

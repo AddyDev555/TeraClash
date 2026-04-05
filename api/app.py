@@ -5,7 +5,6 @@ from flask_cors import CORS
 from routes.auth import auth_bp
 from routes.profile import profile_bp
 from routes.user_info import user_info_bp
-from routes.tracker import track_location_bp
 from routes.user_locations import user_location_bp
 from routes.status_flags import flags_bp
 from flask_migrate import Migrate
@@ -23,7 +22,6 @@ jwt = JWTManager(app)
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(profile_bp, url_prefix="/api/profile")
 app.register_blueprint(user_info_bp, url_prefix="/api")
-app.register_blueprint(track_location_bp, url_prefix="/api")
 app.register_blueprint(user_location_bp, url_prefix="/api")
 app.register_blueprint(flags_bp, url_prefix="/api")
 

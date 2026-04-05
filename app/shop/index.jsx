@@ -10,6 +10,7 @@ import {
 } from 'react-native'
 import React, {useContext} from 'react'
 import { Ionicons } from '@expo/vector-icons'
+import { useTheme } from '@react-navigation/native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import BottomBar from '@/components/bottomBar';
@@ -29,6 +30,8 @@ export default function index() {
         } = useContext(AppDataContext);
     
     const router = useRouter();
+
+    const { colors } = useTheme();
 
     const [selectedPowerup, setSelectedPowerup] = React.useState(null);
     const [modalVisible, setModalVisible] = React.useState(false);
@@ -82,9 +85,9 @@ export default function index() {
         filter === "all"
             ? powerups
             : powerups.filter((p) => p.type === filter)
-
     const getTypeColor = (type) => {
-        return type === 'defensive' ? '#3b82f6' : '#f59e0b'
+        // Use cyan as the primary app color for all powerup accents
+        return 'cyan'
     }
 
     const PowerupCard = ({ powerup }) => (
@@ -101,9 +104,9 @@ export default function index() {
                     <Text style={styles.powerupName}>{powerup.name}</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                         <View style={[styles.typeBadge, { backgroundColor: `${getTypeColor(powerup.type)}20` }]}>
-                            <Text style={[styles.typeText, { color: getTypeColor(powerup.type) }]}>
-                                {powerup.type.toUpperCase()}
-                            </Text>
+                                    <Text style={[styles.typeText, { color: getTypeColor(powerup.type) }]}>
+                                        {powerup.type.toUpperCase()}
+                                    </Text>
                         </View>
                         <View style={styles.stockContainer}>
                             <Text style={styles.stockText}>
@@ -149,7 +152,7 @@ export default function index() {
     )
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <StatusBar style="light" translucent backgroundColor="transparent" hidden />
             <View style={styles.floatingHead}>
             <Navbar userInfo={userInfo} />
@@ -221,11 +224,14 @@ export default function index() {
                         end={{ x: 1, y: 1 }}
                     >
                         <View style={styles.modalIconContainer}>
-                            <Ionicons
-                                name={selectedPowerup?.icon}
-                                size={40}
-                                color="#fff"
-                            />
+                            <LinearGradient
+                                colors={[getTypeColor(selectedPowerup?.type || 'defensive'), '#0ea5e9']}
+                                style={styles.modalIconGradient}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                            >
+                                <Ionicons name={selectedPowerup?.icon} size={40} color="#fff" />
+                            </LinearGradient>
                         </View>
 
                         <Text style={styles.modalTitle}>

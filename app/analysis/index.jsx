@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppDataContext } from '../context/AppDataProvider';
 import Navbar from '@/components/navbar';
 import BottomBar from '@/components/bottomBar';
+import { useTheme } from '@react-navigation/native'
 const { width } = Dimensions.get('window');
 
 export default function AnalysisPage() {
@@ -16,6 +17,8 @@ export default function AnalysisPage() {
         setUserLocation,
         userFlags,
     } = useContext(AppDataContext);
+
+    const { colors } = useTheme();
 
     const weeklySteps = [4000, 6500, 8000, 5000, 9000, 12000, 7000];
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -93,7 +96,7 @@ export default function AnalysisPage() {
     );
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <StatusBar style="light" translucent backgroundColor="transparent" hidden />
 
             {/* Scrollable Content */}
@@ -108,7 +111,7 @@ export default function AnalysisPage() {
                 <View style={styles.statsGrid}>
                     <StatCard
                         title="Total Steps"
-                        value={totalSteps.toLocaleString()}
+                        value={userInfo?.total_steps?.toLocaleString() || 0}
                         icon="footsteps-outline"
                         color="cyan"
                     />
@@ -229,11 +232,13 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#fff',
         marginBottom: 3,
+        marginLeft: 8,
         letterSpacing: -0.4,
     },
     statSubtitle: {
         fontSize: 11,
         color: '#64748b',
+        marginLeft: 8,
     },
     chartContainer: {
         backgroundColor: '#1e293b',

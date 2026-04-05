@@ -35,18 +35,10 @@ class UserInfo(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-
-    total_steps = db.Column(db.Integer, default=0)
-    total_distance = db.Column(db.Float, default=0.0)
-
-    steps_today = db.Column(db.Integer, default=0)
-    distance_today = db.Column(db.Float, default=0.0)
-    calories_today = db.Column(db.Float, default=0.0)
-
     areas_captured = db.Column(db.Integer, default=0)
-    streak = db.Column(db.Integer, default=0)
     user_level = db.Column(db.Integer, default=1)
     sweat_coins = db.Column(db.Integer, default=0)
+    streak = db.Column(db.Integer, default=0)
 
     last_updated = db.Column(
         db.DateTime,
@@ -59,17 +51,39 @@ class UserInfo(db.Model):
     def to_dict(self):
         return {
             "user_id": self.user_id,
-            "total_steps": self.total_steps,
-            "total_distance": self.total_distance,
-            "steps_today": self.steps_today,
-            "distance_today": self.distance_today,
-            "calories_today": self.calories_today,
             "areas_captured": self.areas_captured,
-            "streak": self.streak,
             "user_level": self.user_level,
             "sweat_coins": self.sweat_coins,
+            "streak": self.streak,
             "last_updated": self.last_updated.isoformat() if self.last_updated else None
         }
+
+class Analysis(db.Model):
+    __tablename__ = "analysis"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    steps = db.Column(db.Integer, default=0)
+    distance = db.Column(db.Float, default=0.0)
+    calories_burned = db.Column(db.Float, default=0.0)
+    last_updated = db.Column(
+        db.DateTime,
+        server_default=db.func.now(),
+        onupdate=db.func.now()
+    )
+
+    user = db.relationship("User", backref="analysis")
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "steps": self.steps,
+            "distance": self.distance,
+            "calories_burned": self.calories_burned,
+            "streak": self.streak,
+            "last_updated": self.last_updated.isoformat() if self.last_updated else None
+        }
+    
         
 class UserLocation(db.Model):
     __tablename__ = "user_locations"
@@ -89,25 +103,6 @@ class UserLocation(db.Model):
             "latitude": self.latitude,
             "longitude": self.longitude,
             "area_name": self.area_name,
-            "timestamp": self.timestamp.isoformat() if self.timestamp else None
-        }
-
-class TrackLocation(db.Model):
-    __tablename__ = "track_locations"
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    latitude = db.Column(db.Float, nullable=False)
-    longitude = db.Column(db.Float, nullable=False)
-    timestamp = db.Column(db.DateTime, server_default=db.func.now())
-    
-    user = db.relationship("User", backref="track")
-    
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "latitude": self.latitude,
-            "longitude": self.longitude,
             "timestamp": self.timestamp.isoformat() if self.timestamp else None
         }
 
@@ -131,7 +126,7 @@ class Arena(db.Model):
             "longitude": self.longitude,
             "area_radius": self.area_radius
         }
-        
+
 class Flags(db.Model):
     __tablename__ = "flags"
     id = db.Column(db.Integer, primary_key=True)
@@ -146,4 +141,4 @@ class Flags(db.Model):
             "user_id": self.user_id,
             "mascot_status": self.mascot_status
         }
-    
+

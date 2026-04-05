@@ -16,8 +16,7 @@ export default function BottomBar() {
     const router = useRouter()
 
     const handleTabPress = (route, name) => {
-        // Use replace for tab switches to avoid stacking routes and any residual transitions
-        router.replace(route);
+        router.push(route);
     }
 
 
