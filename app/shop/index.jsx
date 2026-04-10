@@ -217,21 +217,19 @@ export default function index() {
             {/* Info Modal */}
             <Modal visible={modalVisible} transparent animationType="fade">
                 <View style={styles.modalOverlay}>
-                    <LinearGradient
-                        colors={['#1e293b', '#0f172a']}
+                    <View
                         style={styles.modalCard}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
                     >
                         <View style={styles.modalIconContainer}>
-                            <LinearGradient
-                                colors={[getTypeColor(selectedPowerup?.type || 'defensive'), '#0ea5e9']}
+                            <View
                                 style={styles.modalIconGradient}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
                             >
                                 <Ionicons name={selectedPowerup?.icon} size={40} color="#fff" />
-                            </LinearGradient>
+                            </View>
                         </View>
 
                         <Text style={styles.modalTitle}>
@@ -263,7 +261,7 @@ export default function index() {
                         >
                             <Text style={styles.closeBtnText}>Got it</Text>
                         </TouchableOpacity>
-                    </LinearGradient>
+                    </View>
                 </View>
             </Modal>
 
@@ -288,7 +286,7 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         gap: 12,
         backgroundColor: '#1e293b',
-        borderRadius: 12,
+        borderRadius: 10,
         padding: 4,
         marginTop: 15,
     },
@@ -320,7 +318,7 @@ const styles = StyleSheet.create({
         gap: 14,
     },
     powerupCard: {
-        borderRadius: 18,
+        borderRadius: 10,
         padding: 14,
         borderWidth: 1,
         borderColor: '#2d3a4e',
@@ -339,7 +337,7 @@ const styles = StyleSheet.create({
     iconContainer: {
         width: 48,
         height: 48,
-        borderRadius: 14,
+        borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
@@ -357,7 +355,7 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
         paddingHorizontal: 6,
         paddingVertical: 2,
-        borderRadius: 5,
+        borderRadius: 10,
     },
     typeText: {
         fontSize: 9,
@@ -392,7 +390,7 @@ const styles = StyleSheet.create({
     coinIcon: {
         backgroundColor: 'rgba(250,204,21,0.2)',
         padding: 3,
-        borderRadius: 7,
+        borderRadius: 10,
     },
     powerupPrice: {
         color: '#facc15',
@@ -407,7 +405,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.05)',
         paddingHorizontal: 6,
         paddingVertical: 2,
-        borderRadius: 7,
+        borderRadius: 10,
     },
     stockText: {
         color: '#94a3b8',
@@ -468,12 +466,13 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     modalCard: {
-        borderRadius: 22,
+        borderRadius: 10,
         padding: 20,
         width: '100%',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#2d3a4e',
+        backgroundColor: '#1e293b',
     },
     modalIconContainer: {
         marginBottom: 14,
@@ -486,7 +485,7 @@ const styles = StyleSheet.create({
     modalIconGradient: {
         width: 80,
         height: 80,
-        borderRadius: 40,
+        borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },

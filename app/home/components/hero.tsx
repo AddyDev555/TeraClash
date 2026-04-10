@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, Platform, AppState } from 'react-native'
 import React, { useEffect, useState, useRef } from 'react'
 import { Accelerometer } from 'expo-sensors'
-import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
+import { FontAwesome5, MaterialCommunityIcons , Ionicons} from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as TaskManager from 'expo-task-manager'
 import * as Location from 'expo-location'
@@ -323,7 +323,7 @@ export default function HeroCards() {
         <View style={styles.container}>
             <View style={styles.card}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <FontAwesome5 name="walking" size={20} color="cyan" />
+                    <Ionicons name="footsteps-outline" size={20} color="cyan" />
                     <Text style={styles.value}>{steps.toLocaleString()}</Text>
                     <Text style={styles.label}>Steps</Text>
                 </View>
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
     card: {
         width: '31%',
         height: 37,
-        borderRadius: 12,
+        borderRadius: 10,
         paddingLeft: 10,
         padding: 5,
         justifyContent: 'space-between',

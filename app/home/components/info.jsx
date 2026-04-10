@@ -9,6 +9,7 @@ import {
     Animated,
     Dimensions,
     Pressable,
+    PanResponder
 } from 'react-native';
 
 const { height } = Dimensions.get('window');
@@ -45,6 +46,33 @@ const ConqueredAreasWidget = ({ areas, onAreaPress, userInfo }) => {
     const [visible, setVisible] = useState(false);
     const translateY = useRef(new Animated.Value(300)).current;
 
+    const panY = useRef(new Animated.Value(0)).current;
+
+const panResponder = useRef(
+    PanResponder.create({
+        onMoveShouldSetPanResponder: (_, gestureState) => {
+            return Math.abs(gestureState.dy) > 5;
+        },
+        onPanResponderMove: (_, gestureState) => {
+            if (gestureState.dy > 0) {
+                panY.setValue(gestureState.dy);
+            }
+        },
+        onPanResponderRelease: (_, gestureState) => {
+            if (gestureState.dy > 120) {
+                close(); // drag enough → close
+                panY.setValue(0);
+            } else {
+                // snap back
+                Animated.spring(panY, {
+                    toValue: 0,
+                    useNativeDriver: true,
+                }).start();
+            }
+        },
+    })
+).current;
+
     const open = () => {
         setVisible(true);
         Animated.spring(translateY, {
@@ -79,14 +107,21 @@ const ConqueredAreasWidget = ({ areas, onAreaPress, userInfo }) => {
             {/* Bottom Sheet */}
             <Modal visible={visible} transparent animationType="none">
                 <Pressable style={styles.backdrop} onPress={close} />
-
                 <Animated.View
+                    {...panResponder.panHandlers}
                     style={[
                         styles.sheet,
-                        { transform: [{ translateY }] },
+                        {
+                            transform: [
+                                {
+                                    translateY: Animated.add(translateY, panY),
+                                },
+                            ],
+                        },
                     ]}
                 >
-                    <Text style={styles.title}>Conquered Territories</Text>
+                    <View style={styles.handle} />
+                    {/* <Text style={styles.title}>Conquered Territories</Text> */}
 
                     <FlatList
                         data={areas}
@@ -194,7 +229,7 @@ const styles = StyleSheet.create({
 
     backdrop: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.6)',
+        // backgroundColor: 'rgba(0,0,0,0.6)',
     },
 
     sheet: {
@@ -230,6 +265,15 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 20,
     },
+
+    handle: {
+        width: 60,
+        height: 5,
+        borderRadius: 3,
+        backgroundColor: '#64748b',
+        alignSelf: 'center',
+        marginBottom: 5,
+},
 });
 
 export default ConqueredAreasWidget;

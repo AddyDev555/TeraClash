@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     },
     section: {
         paddingHorizontal: 16,
-        marginTop: 20,
+        marginTop: 15,
     },
     sectionTitle: {
         color: '#fff',
@@ -546,6 +546,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     statCard: {
+        width: 100,
         backgroundColor: '#1e293b',
         borderRadius: 16,
         padding: 12,
