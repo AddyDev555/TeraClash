@@ -51,7 +51,7 @@ export default function RootLayout() {
 
   return (
     <AppDataProvider>
-      <Stack initialRouteName={initialRoute} screenOptions={{ animationEnabled: false }}>
+      <Stack initialRouteName={initialRoute} screenOptions={{ headerStyle: { backgroundColor: '#0f172a' }}}>
         <Stack.Screen name="home" options={{ headerShown: false }} />
         <Stack.Screen name="shop/index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />

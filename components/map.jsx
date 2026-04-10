@@ -1,23 +1,22 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { StyleSheet, View, Dimensions, Text } from 'react-native'
-import MapView, { Circle, Polygon, Polyline, Marker, Callout } from 'react-native-maps'
+import { View, StyleSheet } from 'react-native'
+import { WebView } from 'react-native-webview'
 import * as Location from 'expo-location'
 
-export default function Home({ userLocation, setUserLocation, user }) {
+export default function Home({ userLocation, user }) {
     const [location, setLocation] = useState(null)
     const [heading, setHeading] = useState(0)
     const [path, setPath] = useState([])
+
+    const webRef = useRef(null)
+
     const otherUsers = userLocation?.filter(u => u.user_id !== user?.id)
-    const [region, setRegion] = useState(null)
-    const [followUser, setFollowUser] = useState(true)
-    const mapRef = useRef(null)
-    const markerRefs = useRef({})
 
     useEffect(() => {
         let locationSub
         let headingSub
 
-        (async () => {
+        ;(async () => {
             const { status } = await Location.requestForegroundPermissionsAsync()
             if (status !== 'granted') return
 
@@ -29,13 +28,12 @@ export default function Home({ userLocation, setUserLocation, user }) {
                 },
                 (loc) => {
                     const newPoint = {
-                        latitude: loc.coords.latitude,
-                        longitude: loc.coords.longitude,
+                        lat: loc.coords.latitude,
+                        lng: loc.coords.longitude,
                     }
 
                     setLocation(newPoint)
-
-                    setPath(prev => prev.length === 0 ? [newPoint] : [...prev, newPoint])
+                    setPath(prev => [...prev, newPoint])
                 }
             )
 
@@ -50,120 +48,136 @@ export default function Home({ userLocation, setUserLocation, user }) {
         }
     }, [])
 
-    if (!location) return null
+    // 🔥 Send updates to WebView (NO reload)
+    useEffect(() => {
+        if (!webRef.current || !location) return
 
-    const getCone = (lat, lng, heading) => {
-        const length = 0.0007
-        const spread = 25
-        const toRad = deg => (deg * Math.PI) / 180
-        const adjustedHeading = heading
-        const left = toRad(adjustedHeading - spread)
-        const right = toRad(adjustedHeading + spread)
-        const lngScale = 1 / Math.cos(toRad(lat))
+        const data = {
+            location,
+            heading,
+            path,
+            otherUsers: otherUsers || []
+        }
 
-        return [
-            { latitude: lat, longitude: lng },
-            { latitude: lat + length * Math.cos(left), longitude: lng + length * Math.sin(left) * lngScale },
-            { latitude: lat + length * Math.cos(right), longitude: lng + length * Math.sin(right) * lngScale },
-        ]
-    }
+        webRef.current.postMessage(JSON.stringify(data))
+    }, [location, heading, path, otherUsers])
 
-    const getDynamicRadius = () => {
-        if (!region) return 5
-        const zoomFactor = region.latitudeDelta
-        return Math.max(5, zoomFactor * 1000)
-    }
+    const leafletHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+        <style>
+            html, body, #map { height: 100%; margin: 0; }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script>
+            let map = L.map('map').setView([0, 0], 18)
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map)
+
+            let userMarker = null
+            let pathLine = null
+            let cone = null
+            let otherMarkers = []
+
+            function getCone(lat, lng, heading) {
+                const length = 0.0007
+                const spread = 25
+                const toRad = deg => deg * Math.PI / 180
+
+                const left = toRad(heading - spread)
+                const right = toRad(heading + spread)
+
+                return [
+                    [lat, lng],
+                    [lat + length * Math.cos(left), lng + length * Math.sin(left)],
+                    [lat + length * Math.cos(right), lng + length * Math.sin(right)]
+                ]
+            }
+
+            document.addEventListener("message", function(event) {
+                const data = JSON.parse(event.data)
+                const { location, heading, path, otherUsers } = data
+
+                if (!location) return
+
+                const latlng = [location.lat, location.lng]
+
+                // Move map smoothly
+                map.setView(latlng)
+
+                // User marker
+                if (!userMarker) {
+                    userMarker = L.circleMarker(latlng, {
+                        radius: 8,
+                        color: 'blue',
+                        fillColor: 'blue',
+                        fillOpacity: 1
+                    }).addTo(map)
+                } else {
+                    userMarker.setLatLng(latlng)
+                }
+
+                // Path
+                if (pathLine) {
+                    pathLine.setLatLngs(path)
+                } else {
+                    pathLine = L.polyline(path, { color: '#393D7E', weight: 4 }).addTo(map)
+                }
+
+                // Cone
+                if (cone) {
+                    cone.setLatLngs(getCone(location.lat, location.lng, heading))
+                } else {
+                    cone = L.polygon(getCone(location.lat, location.lng, heading), {
+                        color: 'lightblue',
+                        fillOpacity: 0.5
+                    }).addTo(map)
+                }
+
+                // Other users
+                otherMarkers.forEach(m => map.removeLayer(m))
+                otherMarkers = []
+
+                otherUsers.forEach(u => {
+                    const m = L.circleMarker([u.latitude, u.longitude], {
+                        radius: 8,
+                        color: 'red',
+                        fillColor: 'red',
+                        fillOpacity: 1
+                    }).addTo(map)
+
+                    m.bindPopup(u.name || 'User ' + u.user_id)
+                    otherMarkers.push(m)
+                })
+            })
+        </script>
+    </body>
+    </html>
+    `
 
     return (
         <View style={styles.container}>
-            <MapView
-                ref={mapRef}
-                style={styles.map}
-                region={followUser ? {
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    latitudeDelta: 0.002,
-                    longitudeDelta: 0.002,
-                } : region}
-                onPress={() => { }}
-                onRegionChangeComplete={(reg) => {
-                    setRegion(reg)
-                    setFollowUser(false)
-                }}
-            >
-                {/* Current user path */}
-                {path.length > 1 && (
-                    <Polyline
-                        coordinates={path}
-                        strokeColor="#393D7E"
-                        strokeWidth={4}
-                        lineCap="round"
-                        lineJoin="round"
-                    />
-                )}
-
-                {/* Current user direction cone */}
-                <Polygon
-                    coordinates={getCone(location.latitude, location.longitude, heading)}
-                    fillColor="rgba(135, 206, 250, 0.5)"
-                    strokeColor="rgba(135, 206, 250, 0.8)"
-                    strokeWidth={2}
-                />
-
-                {/* Current user blue dot */}
-                <Circle
-                    center={location}
-                    radius={getDynamicRadius()}
-                    fillColor="rgba(0, 122, 255, 1)"
-                    strokeColor="white"
-                    strokeWidth={2}
-                />
-
-                {/* Other users circles + invisible markers with callouts */}
-                {otherUsers?.map(u => (
-                    <React.Fragment key={u.user_id}>
-                        <Circle
-                            center={{ latitude: u.latitude, longitude: u.longitude }}
-                            radius={getDynamicRadius()}
-                            fillColor="rgba(255, 0, 0, 0.9)"
-                            strokeColor="white"
-                            strokeWidth={1}
-                            tappable={true}
-                            onPress={() => {
-                                markerRefs.current[u.user_id]?.showCallout()
-                            }}
-                        />
-                        <Marker
-                            coordinate={{ latitude: u.latitude, longitude: u.longitude }}
-                            ref={ref => (markerRefs.current[u.user_id] = ref)}
-                            opacity={0}
-                        >
-                            <Callout tooltip>
-                                <View style={{
-                                    backgroundColor: 'rgba(0,0,0,0.7)',
-                                    paddingHorizontal: 6,
-                                    paddingVertical: 3,
-                                    borderRadius: 6,
-                                }}>
-                                    <Text style={{ color: 'white', fontSize: 12 }}>
-                                        {u.name || `User ${u.user_id}`}
-                                    </Text>
-                                </View>
-                            </Callout>
-                        </Marker>
-                    </React.Fragment>
-                ))}
-            </MapView>
+            <WebView
+                ref={webRef}
+                originWhitelist={['*']}
+                source={{ html: leafletHTML }}
+                javaScriptEnabled
+                domStorageEnabled
+                style={{ flex: 1 }}
+            />
         </View>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    map: {
-        height: Dimensions.get('window').height,
-        width: Dimensions.get('window').width,
-    },
+    container: { flex: 1 },
 })
