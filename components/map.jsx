@@ -1,12 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { View, StyleSheet } from 'react-native'
+import { View, StyleSheet, Text } from 'react-native'
 import { WebView } from 'react-native-webview'
 import * as Location from 'expo-location'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default function Home({ userLocation, user }) {
     const [location, setLocation] = useState(null)
     const [heading, setHeading] = useState(0)
     const [path, setPath] = useState([])
+    const lastLocRef = useRef(null)
+
+    const STORAGE_KEY = 'walkLocations'
+    const VEHICLE_SPEED_THRESHOLD = 3 // meters/second (~10.8 km/h)
 
     const webRef = useRef(null)
 
@@ -17,7 +22,21 @@ export default function Home({ userLocation, user }) {
         let headingSub
 
         ;(async () => {
+            // preload persisted walking points so they show on map immediately
+            try {
+                const raw = await AsyncStorage.getItem(STORAGE_KEY)
+                if (raw) {
+                    const arr = JSON.parse(raw)
+                    // convert stored points to shape used by the map
+                    const pts = arr.map(p => ({ lat: p.lat, lng: p.lng }))
+                    if (pts.length) setPath(pts)
+                }
+            } catch (e) {
+                console.log('Error loading stored walking points:', e)
+            }
+
             const { status } = await Location.requestForegroundPermissionsAsync()
+            console.log('Map: location permission status ->', status)
             if (status !== 'granted') return
 
             locationSub = await Location.watchPositionAsync(
@@ -26,14 +45,47 @@ export default function Home({ userLocation, user }) {
                     timeInterval: 1000,
                     distanceInterval: 1,
                 },
-                (loc) => {
-                    const newPoint = {
-                        lat: loc.coords.latitude,
-                        lng: loc.coords.longitude,
+                async (loc) => {
+                    const lat = loc.coords.latitude
+                    const lng = loc.coords.longitude
+                    // prefer native speed when available (m/s)
+                    let speed = loc.coords.speed
+
+                    // if speed unavailable, approximate using last location
+                    if (speed == null && lastLocRef.current) {
+                        const last = lastLocRef.current
+                        const dt = (loc.timestamp || Date.now()) - (last.timestamp || 0)
+                        if (dt > 0) {
+                            const meters = haversineMeters(last.lat, last.lng, lat, lng)
+                            speed = meters / (dt / 1000)
+                        }
                     }
 
-                    setLocation(newPoint)
-                    setPath(prev => [...prev, newPoint])
+                    // If speed suggests vehicle, ignore this point
+                    if (typeof speed === 'number' && speed > VEHICLE_SPEED_THRESHOLD) {
+                        // update lastLocRef but do not store/plot
+                        lastLocRef.current = { lat, lng, timestamp: loc.timestamp || Date.now() }
+                        return
+                    }
+
+                    const newPoint = { lat, lng, timestamp: loc.timestamp || Date.now(), speed }
+
+                    setLocation({ lat, lng })
+                    setPath(prev => [...prev, { lat, lng }])
+
+                    // persist walking point
+                    try {
+                        const raw = await AsyncStorage.getItem(STORAGE_KEY)
+                        const arr = raw ? JSON.parse(raw) : []
+                        arr.push(newPoint)
+                        // optionally cap length to avoid unbounded growth
+                        if (arr.length > 10000) arr.splice(0, arr.length - 10000)
+                        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(arr))
+                    } catch (e) {
+                        console.log('Error saving walking location:', e)
+                    }
+
+                    lastLocRef.current = { lat, lng, timestamp: loc.timestamp || Date.now() }
                 }
             )
 
@@ -48,6 +100,19 @@ export default function Home({ userLocation, user }) {
         }
     }, [])
 
+    // helper: haversine distance in meters
+    function haversineMeters(lat1, lon1, lat2, lon2) {
+        const toRad = (v) => (v * Math.PI) / 180
+        const R = 6371000 // earth meters
+        const dLat = toRad(lat2 - lat1)
+        const dLon = toRad(lon2 - lon1)
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2)
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+        return R * c
+    }
+
     // 🔥 Send updates to WebView (NO reload)
     useEffect(() => {
         if (!webRef.current || !location) return
@@ -59,7 +124,11 @@ export default function Home({ userLocation, user }) {
             otherUsers: otherUsers || []
         }
 
-        webRef.current.postMessage(JSON.stringify(data))
+        try {
+            webRef.current.postMessage(JSON.stringify(data))
+        } catch (e) {
+            console.warn('WebView postMessage error', e)
+        }
     }, [location, heading, path, otherUsers])
 
     const leafletHTML = `
@@ -166,6 +235,7 @@ export default function Home({ userLocation, user }) {
 
     return (
         <View style={styles.container}>
+            {/** if location permission denied, show message instead of blank map */}
             <WebView
                 ref={webRef}
                 originWhitelist={['*']}
@@ -173,6 +243,8 @@ export default function Home({ userLocation, user }) {
                 javaScriptEnabled
                 domStorageEnabled
                 style={{ flex: 1 }}
+                onError={(e) => console.warn('WebView error', e.nativeEvent)}
+                onHttpError={(e) => console.warn('WebView http error', e.nativeEvent)}
             />
         </View>
     )

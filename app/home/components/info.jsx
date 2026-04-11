@@ -150,7 +150,7 @@ const panResponder = useRef(
 const styles = StyleSheet.create({
     floatingLeft: {
         position: 'absolute',
-        bottom: 80,
+        bottom: 60,
         left: 16,
     },
 
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
 
     floating: {
         position: 'absolute',
-        bottom: 80,
+        bottom: 60,
         left: 80,
     },
 
