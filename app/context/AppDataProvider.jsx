@@ -12,7 +12,7 @@ export function AppDataProvider({ children }) {
     const [userLocation, setUserLocation] = useState([]);
     const [userFlags, setUserFlags] = useState([]);
     const [loading, setLoading] = useState(true);
-    // Flag to disable entry/mount animations across the app
+    const [analysis, setAnalysis] = useState([]);
     const [disableEntryAnimations] = useState(true);
 
     // Theme preference: 'system' | 'light' | 'dark'
@@ -55,6 +55,13 @@ export function AppDataProvider({ children }) {
                 setUserFlags(flagsRes?.flags || []);
             } catch (e) {
                 console.log('fetch flags error', e);
+            }
+
+            try{
+                const analysisRes = await API.get(`/api/analysis/${parsed.id}`);
+                setAnalysis(analysisRes);
+            } catch (e) {
+                console.log('fetch analysis error', e);
             }
 
             // load theme preference
@@ -106,6 +113,8 @@ export function AppDataProvider({ children }) {
                 setUserFlags,
                 disableEntryAnimations,
                 loading,
+                analysis,
+                setAnalysis,
                 refreshAppData: fetchAll,
                 themePreference,
                 setThemePreference: async (pref) => {

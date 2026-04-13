@@ -9,7 +9,7 @@ def get_analysis(user_id):
     analysis = Analysis.query.filter_by(user_id=user_id).first()
 
     if not analysis:
-        return jsonify({"error": "Analysis not found"}), 404
+        return jsonify({"error": "Analysis not found"}), 200
     
     return jsonify(analysis.to_dict()), 200
 

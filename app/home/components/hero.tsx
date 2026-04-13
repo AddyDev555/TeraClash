@@ -1,9 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { FontAwesome5, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
 import { NativeModules, PermissionsAndroid, Platform, NativeEventEmitter } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { API } from '../../../utils/api'
+import { AppDataContext } from '../../context/AppDataProvider';
 
 const { StepModule } = NativeModules
 const { OverlayModule } = NativeModules
@@ -12,6 +13,7 @@ export default function HeroCards() {
     const [steps, setSteps] = useState(0)
     const STORAGE_KEY = 'stepsCount'
     const SNAPSHOT_KEY = 'stepsSnapshot'
+    const RESET_DATE_KEY = 'stepsResetDate'
 
     useEffect(() => {
         let interval: any = null
@@ -106,40 +108,58 @@ export default function HeroCards() {
         const checkStaleSnapshot = async () => {
             try {
                 const snapRaw = await AsyncStorage.getItem(SNAPSHOT_KEY)
+                const resetDateRaw = await AsyncStorage.getItem(RESET_DATE_KEY)
                 const today = new Date().toISOString().split('T')[0]
+                const lastResetDate = resetDateRaw ? String(resetDateRaw) : null
+                const userRaw = await AsyncStorage.getItem('user');
 
-                if (!snapRaw) return
-
-                const snap = JSON.parse(snapRaw)
-
-                if (!snap?.date || snap.date === today) return
-                if (!snap.steps || isNaN(snap.steps)) return
-
-                const payload = {
-                    date: snap.date,
-                    steps: snap.steps,
-                    distance_km: Number((snap.steps * 0.0008).toFixed(2)),
-                    calories: Math.round(snap.steps * 0.04),
+                if (!userRaw) {
+                    console.log('No user found in storage');
+                    return;
                 }
 
-                try {
-                    await API.post('/api/analysis', payload)
+                const user = JSON.parse(userRaw);
+                
+                if (snapRaw) {
+                    const snap = JSON.parse(snapRaw)
 
-                    console.log('Snapshot synced:', payload)
+                    if (snap?.date && snap.date !== today && snap.steps >= 0) {
 
-                    await AsyncStorage.removeItem(SNAPSHOT_KEY)
-                } catch (e) {
-                    console.log('Failed to push snapshot:', payload, e)
+                        const payload = {
+                            date: snap.date,
+                            user_id: user.id,
+                            steps: snap.steps,
+                            distance: Number((snap.steps * 0.0008).toFixed(2)),
+                            calories_burned: Math.round(snap.steps * 0.04),
+                        };
+
+                        console.log('Pushing stale snapshot to backend:', payload)
+
+                        await API.post('/api/analysis', payload);
+                    }
                 }
 
+                if (lastResetDate !== today) {
+                    setSteps(0)
+                    try {
+                        await AsyncStorage.setItem(STORAGE_KEY, '0')
+                        await AsyncStorage.setItem(RESET_DATE_KEY, today)
+                        OverlayModule?.updateOverlay?.(0, 0, 0)
+                    } catch (e) {
+                        console.log('Error resetting daily values:', e)
+                    }
+                }
             } catch (e) {
                 console.log('Error checking stale snapshot:', e)
             }
         }
 
-        checkStaleSnapshot()
+        const initialize = async () => {
+            await checkStaleSnapshot()
+            setup()
+        }
 
-        setup()
+        initialize()
 
         return () => {
             if (interval) clearInterval(interval)
@@ -163,26 +183,6 @@ export default function HeroCards() {
 
             try {
                 const today = new Date().toISOString().slice(0, 10)
-                const raw = await AsyncStorage.getItem(SNAPSHOT_KEY)
-                if (raw) {
-                    const snap = JSON.parse(raw)
-                    if (snap?.date && snap.date !== today && snap.steps > 0) {
-                        // push previous day's snapshot
-                        const payload = {
-                            date: snap.date,
-                            steps: snap.steps,
-                            distance_km: Number((snap.steps * KM_PER_STEP).toFixed(2)),
-                            calories: Math.round(snap.steps * KCAL_PER_STEP),
-                        }
-                        try {
-                            await API.post('/steps', payload)
-                            await AsyncStorage.removeItem(SNAPSHOT_KEY)
-                        } catch (e) {
-                            console.log('Error pushing daily summary:', e)
-                        }
-                    }
-                }
-
                 // write current snapshot for today
                 const newSnap = { date: today, steps }
                 await AsyncStorage.setItem(SNAPSHOT_KEY, JSON.stringify(newSnap))

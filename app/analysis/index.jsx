@@ -15,6 +15,7 @@ export default function AnalysisPage() {
         userInfo,
         userLocation,
         setUserLocation,
+        analysis,
         userFlags,
     } = useContext(AppDataContext);
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { View, StyleSheet, Text } from 'react-native'
+import { View, StyleSheet, Text, ActivityIndicator } from 'react-native'
 import { WebView } from 'react-native-webview'
 import * as Location from 'expo-location'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -8,14 +8,25 @@ export default function Home({ userLocation, user }) {
     const [location, setLocation] = useState(null)
     const [heading, setHeading] = useState(0)
     const [path, setPath] = useState([])
+    const [mapLoaded, setMapLoaded] = useState(false)
     const lastLocRef = useRef(null)
 
     const STORAGE_KEY = 'walkLocations'
-    const VEHICLE_SPEED_THRESHOLD = 3 // meters/second (~10.8 km/h)
-
+    const VEHICLE_SPEED_THRESHOLD = 2.5
+    
     const webRef = useRef(null)
-
     const otherUsers = userLocation?.filter(u => u.user_id !== user?.id)
+
+    const handleWebMessage = (event) => {
+        try {
+            const message = JSON.parse(event.nativeEvent.data)
+            if (message?.type === 'mapReady') {
+                setMapLoaded(true)
+            }
+        } catch (e) {
+            // ignore malformed messages
+        }
+    }
 
     useEffect(() => {
         let locationSub
@@ -146,11 +157,25 @@ export default function Home({ userLocation, user }) {
 
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
         <script>
-            let map = L.map('map').setView([0, 0], 18)
+            const sendNativeMessage = (message) => {
+                const payload = JSON.stringify(message)
+                if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                    window.ReactNativeWebView.postMessage(payload)
+                } else if (window.parent && window.parent.postMessage) {
+                    window.parent.postMessage(payload, '*')
+                }
+            }
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            let map = L.map('map', {
+                zoomControl: false,
+                minZoom: 12,
+            }).setView([0, 0], 18)
+
+            const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap'
             }).addTo(map)
+
+            tileLayer.on('load', () => sendNativeMessage({ type: 'mapReady' }))
 
             let userMarker = null
             let pathLine = null
@@ -172,62 +197,69 @@ export default function Home({ userLocation, user }) {
                 ]
             }
 
-            document.addEventListener("message", function(event) {
-                const data = JSON.parse(event.data)
-                const { location, heading, path, otherUsers } = data
+            const handleIncomingMessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data)
+                    const { location, heading, path, otherUsers } = data
 
-                if (!location) return
+                    if (!location) return
 
-                const latlng = [location.lat, location.lng]
+                    const latlng = [location.lat, location.lng]
 
-                // Move map smoothly
-                map.setView(latlng)
+                    // Move map smoothly
+                    map.setView(latlng)
 
-                // User marker
-                if (!userMarker) {
-                    userMarker = L.circleMarker(latlng, {
-                        radius: 8,
-                        color: 'blue',
-                        fillColor: 'blue',
-                        fillOpacity: 1
-                    }).addTo(map)
-                } else {
-                    userMarker.setLatLng(latlng)
+                    // User marker
+                    if (!userMarker) {
+                        userMarker = L.circleMarker(latlng, {
+                            radius: 8,
+                            color: 'blue',
+                            fillColor: 'blue',
+                            fillOpacity: 1
+                        }).addTo(map)
+                    } else {
+                        userMarker.setLatLng(latlng)
+                    }
+
+                    // Path
+                    if (pathLine) {
+                        pathLine.setLatLngs(path)
+                    } else {
+                        pathLine = L.polyline(path, { color: '#393D7E', weight: 4 }).addTo(map)
+                    }
+
+                    // Cone
+                    if (cone) {
+                        cone.setLatLngs(getCone(location.lat, location.lng, heading))
+                    } else {
+                        cone = L.polygon(getCone(location.lat, location.lng, heading), {
+                            color: 'lightblue',
+                            fillOpacity: 0.5
+                        }).addTo(map)
+                    }
+
+                    // Other users
+                    otherMarkers.forEach(m => map.removeLayer(m))
+                    otherMarkers = []
+
+                    otherUsers.forEach(u => {
+                        const m = L.circleMarker([u.latitude, u.longitude], {
+                            radius: 8,
+                            color: 'red',
+                            fillColor: 'red',
+                            fillOpacity: 1
+                        }).addTo(map)
+
+                        m.bindPopup(u.name || 'User ' + u.user_id)
+                        otherMarkers.push(m)
+                    })
+                } catch (err) {
+                    // ignore malformed messages
                 }
+            }
 
-                // Path
-                if (pathLine) {
-                    pathLine.setLatLngs(path)
-                } else {
-                    pathLine = L.polyline(path, { color: '#393D7E', weight: 4 }).addTo(map)
-                }
-
-                // Cone
-                if (cone) {
-                    cone.setLatLngs(getCone(location.lat, location.lng, heading))
-                } else {
-                    cone = L.polygon(getCone(location.lat, location.lng, heading), {
-                        color: 'lightblue',
-                        fillOpacity: 0.5
-                    }).addTo(map)
-                }
-
-                // Other users
-                otherMarkers.forEach(m => map.removeLayer(m))
-                otherMarkers = []
-
-                otherUsers.forEach(u => {
-                    const m = L.circleMarker([u.latitude, u.longitude], {
-                        radius: 8,
-                        color: 'red',
-                        fillColor: 'red',
-                        fillOpacity: 1
-                    }).addTo(map)
-
-                    m.bindPopup(u.name || 'User ' + u.user_id)
-                    otherMarkers.push(m)
-                })
-            })
+            document.addEventListener('message', handleIncomingMessage)
+            window.addEventListener('message', handleIncomingMessage)
         </script>
     </body>
     </html>
@@ -243,13 +275,43 @@ export default function Home({ userLocation, user }) {
                 javaScriptEnabled
                 domStorageEnabled
                 style={{ flex: 1 }}
+                onMessage={handleWebMessage}
                 onError={(e) => console.warn('WebView error', e.nativeEvent)}
                 onHttpError={(e) => console.warn('WebView http error', e.nativeEvent)}
             />
+            {!mapLoaded && (
+                <View style={styles.loaderOverlay} pointerEvents="none">
+                    <View style={styles.loaderBox}>
+                        <ActivityIndicator size="large" color="#ffffff" />
+                        <Text style={styles.loaderText}>Loading map...</Text>
+                    </View>
+                </View>
+            )}
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
+    loaderOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(15, 23, 42, 0.88)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10,
+    },
+    loaderBox: {
+        padding: 24,
+        borderRadius: 16,
+        backgroundColor: 'rgba(20, 28, 45, 0.95)',
+        alignItems: 'center',
+        width: '80%',
+        maxWidth: 320,
+    },
+    loaderText: {
+        marginTop: 16,
+        color: '#ffffff',
+        fontSize: 16,
+        textAlign: 'center',
+    },
 })
